@@ -70,13 +70,13 @@ class StrategicPlayer(Player):
                 if "hit" in result["attacked"] and "near" not in result:
                     self.player_HP -= 1
             elif "moved" in result:
-                num_arrows = result["moved"]["distance"]
+                movement = result["moved"]["distance"]
                 # Update possible positions based on the direction and number of arrows
                 for pos in self.opponent_possible_positions.copy():  # Create a copy before iterating
-                    for i in range(1, num_arrows[0] + 1):
-                        new_pos = (pos[0] + i * num_arrows[0], pos[1] + i * num_arrows[1])
-                        if new_pos in self.field:
-                            self.opponent_possible_positions.append(new_pos)
+                    x, y = pos
+                    new_pos = (x + movement[0], y + movement[1])
+                    if new_pos in self.field and new_pos not in self.opponent_possible_positions:
+                        self.opponent_possible_positions.append(new_pos)
 
     def update_after_action(self, json_str):
         print("Received JSON Data in update_after_action:")
