@@ -63,6 +63,7 @@ class StrategicPlayer(Player):
                 around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
                                 for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
                                 if (x, y) in self.field]
+                print(around_attacked)
                 # Add the 9 cells around the attacked position to possible opponent position list 
                 self.opponent_possible_positions.extend(around_attacked)
                 if "hit" in result["attacked"] and "near" not in result:
@@ -91,6 +92,7 @@ class StrategicPlayer(Player):
                     around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
                                         for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
                                         if (x, y) in self.field]
+                    print(around_attacked)
                     self.opponent_possible_positions.extend(around_attacked)
 
     def action(self):
