@@ -16,7 +16,7 @@ class StrategicPlayer(Player):
 
     def __init__(self, seed=None):
         if seed is None:
-            # Generate a random seed based on current time
+            # Generate a random seed based on the current time
             seed = int(time.time())
 
         random.seed(seed)
@@ -26,8 +26,10 @@ class StrategicPlayer(Player):
                       for j in range(Player.FIELD_SIZE)]
 
         while True:
-            # Randomly select three positions for the ships
-            ps = random.sample(self.field, 3)
+            # Shuffle the list of available positions
+            random.shuffle(self.field)
+            # Assign the first three positions to the ships
+            ps = self.field[:3]
             self.positions = {'w': ps[0], 'c': ps[1], 's': ps[2]}
 
             # Validate that the ships are not in the same row, column, or diagonally adjacent
