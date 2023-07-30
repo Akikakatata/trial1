@@ -60,7 +60,7 @@ class StrategicPlayer(Player):
                 around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
                                 for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
                                 if (x, y) in self.field]
-                self.opppnent_possible_positions = {k: [pos.copy() for pos in v if pos in around_attacked]
+                self.opppnent_possible_positions = {k: [pos for pos in v if pos in around_attacked and pos not in self.ships.values()]
                                                     for k, v in self.opppnent_possible_positions.items()}
             elif "moved" in result:
                 num_arrows = result["moved"]["distance"]
@@ -68,9 +68,9 @@ class StrategicPlayer(Player):
                 for k, v in self.opppnent_possible_positions.items():
                     for pos in v:
                         new_pos = (pos[0] + num_arrows[0], pos[1] + num_arrows[1])
-                        if new_pos in self.field:
+                        if new_pos in self.field and new_pos not in self.ships.values():
                             pos[0], pos[1] = new_pos
-                self.opppnent_possible_positions = {k: [pos for pos in v if pos in self.field]
+                self.opppnent_possible_positions = {k: [pos for pos in v if pos in self.field and pos not in self.ships.values()]
                                                     for k, v in self.opppnent_possible_positions.items()}
 
     def action(self):
