@@ -113,6 +113,10 @@ class StrategicPlayer(Player):
             ship_type = random.choice(list(self.opppnent_possible_positions.keys()))
             to = random.choice(self.opppnent_possible_positions[ship_type])
 
+            while not self.can_attack(to):
+                ship_type = random.choice(list(self.opppnent_possible_positions.keys()))
+                to = random.choice(self.opppnent_possible_positions[ship_type])
+
             response_json_str = self.attack(to)  # Perform the attack and get the server's response
             response_data = json.loads(response_json_str)
 
@@ -131,7 +135,6 @@ class StrategicPlayer(Player):
                 for ship_type, positions in self.opppnent_possible_positions.items():
                     self.opppnent_possible_positions[ship_type] = [list(pos) for pos in positions]
 
-            return response_json_str
 
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
