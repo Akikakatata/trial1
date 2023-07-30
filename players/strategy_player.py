@@ -60,7 +60,7 @@ class StrategicPlayer(Player):
                                 if (x, y) in self.field]
 
                 # Find the overlap between the previous possible positions and the 9 cells around the attacked position
-                self.opponent_possible_positions.extend(around_attacked)
+                self.opponent_possible_positions = self.opponent_possible_positions + around_attacked
 
             elif "moved" in result:
                 num_arrows = result["moved"]["distance"]
