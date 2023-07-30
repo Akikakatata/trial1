@@ -125,7 +125,7 @@ class StrategicPlayer(Player):
         elif act == "attack":
             if self.opponent_possible_positions:
                 ship_type = random.choice(list(self.opponent_possible_positions.keys()))
-                possible_positions = self.opponent_possible_positions.get(ship_type, [])
+                to = self.opponent_possible_positions.get(ship_type, [])
                 while not self.can_attack(to):
                     to = random.choice(self.opponent_possible_positions)
                 return json.dumps(self.attack(to))
