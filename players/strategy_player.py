@@ -75,7 +75,7 @@ class StrategicPlayer(Player):
                 for pos in self.opponent_possible_positions:
                     x, y = pos
                     new_pos = (x + movement[0], y + movement[1])
-                    if new_pos in self.field and not in self.opponent_possible_positions:
+                    if new_pos in self.field and new_pos not in self.opponent_possible_positions:
                         self.opponent_possible_positions.append(new_pos)
 
     def update_after_action(self, json_str):
