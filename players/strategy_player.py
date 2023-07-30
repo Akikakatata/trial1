@@ -60,35 +60,16 @@ class StrategicPlayer(Player):
                                 if (x, y) in self.field]
 
                 # Find the overlap between the previous possible positions and the 9 cells around the attacked position
-                self.opponent_possible_positions = list(set(map(tuple, self.opponent_possible_positions)) & set(around_attacked))
-
-                # Convert the positions back to lists
-                self.opponent_possible_positions = [list(pos) for pos in self.opponent_possible_positions]
+                self.opponent_possible_positions.append(around_attacked)
 
             elif "moved" in result:
                 num_arrows = result["moved"]["distance"]
-                # Create a copy of the current possible positions
-                current_possible_positions = self.opponent_possible_positions.copy()
-
-                # Clear the current possible positions list
-                self.opponent_possible_positions.clear()
-
                 # Update possible positions based on the direction and number of arrows
-                for pos in current_possible_positions:
+                for pos in self.opponent_possible_positions:
                     for i in range(1, num_arrows + 1):
                         new_pos = (pos[0] + i * num_arrows[0], pos[1] + i * num_arrows[1])
                         if new_pos in self.field:
                             self.opponent_possible_positions.append(new_pos)
-
-                # Add the original positions back to the list
-                self.opponent_possible_positions.extend(current_possible_positions)
-
-                # Remove duplicate positions
-                self.opponent_possible_positions = list(set(map(tuple, self.opponent_possible_positions)))
-
-                # Convert the positions back to lists
-                self.opponent_possible_positions = [list(pos) for pos in self.opponent_possible_positions]
-
 
     def action(self):
         act = random.choice(["move", "attack"])
