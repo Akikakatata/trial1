@@ -128,7 +128,7 @@ class StrategicPlayer(Player):
                         break
             else:
                 ship_type = random.choice(list(self.opponent_possible_positions))
-                to = random.choice(self.opponent_possible_positions))
+                to = random.choice(self.opponent_possible_positions)
 
             if self.can_attack(to):
                 return json.dumps(self.attack(to))
