@@ -47,6 +47,9 @@ class StrategicPlayer(Player):
 
         self.opponent_possible_positions = []
         self.opnnent_certain_positions = []
+        self.opponent_HP = 6
+        self.player_HP = 6
+
 
     def update_self_opponent_possible_positions(self, json_str):
         json_data = json.loads(json_str)
@@ -60,7 +63,8 @@ class StrategicPlayer(Player):
                                 if (x, y) in self.field]
                 # Add the 9 cells around the attacked position to possible opponent position list 
                 self.opponent_possible_positions.extend(around_attacked)
-
+                if "hit" in result["attacked"] and "near" not in result:
+                    self.player_HP -= 1
             elif "moved" in result:
                 num_arrows = result["moved"]["distance"]
                 # Update possible positions based on the direction and number of arrows
@@ -72,6 +76,7 @@ class StrategicPlayer(Player):
 
 
     def action(self):
+        
         act = random.choice(["move", "attack"])
 
         print(f"Opponent's Possible Positions:")
@@ -109,6 +114,8 @@ class StrategicPlayer(Player):
                 while not self.can_attack(to):
                     to = random.choice(self.field)
                 return json.dumps(self.attack(to))
+            if "hit" in result["attacked"] and "near" not in result:
+                self.opponent_HP -= 1
 
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
@@ -132,7 +139,6 @@ def main(host, port, seed=0):
                 if info == "your turn":
                     sockfile.write(player.action()+'\n')
                     get_msg = sockfile.readline()
-                    player.update_self_opponent_possible_positions(get_msg)
                 elif info == "waiting":
                     get_msg = sockfile.readline()
                     player.update_self_opponent_possible_positions(get_msg)
