@@ -21,7 +21,6 @@ class StrategicPlayer(Player):
 
         random.seed(seed)
 
-
         # Initialize the field as a 2x2 grid
         self.field = [[i, j] for i in range(Player.FIELD_SIZE)
                       for j in range(Player.FIELD_SIZE)]
@@ -48,14 +47,14 @@ class StrategicPlayer(Player):
                     break
 
             if validation == "fit":
-                super().__init__(self.positions)
+                # Assign the ship positions directly to self.ships instead of calling Player's __init__
+                self.ships = {type: PlayerShip(type, pos) for type, pos in self.positions.items()}
                 break
 
-        self.opponent_possible_positions =  []
+        self.opponent_possible_positions = []
         self.opnnent_certain_positions = []
         self.opponent_HP = 6
         self.player_HP = 6
-
 
     def update_self_opponent_possible_positions(self, json_str):
         print("Received JSON Data in update_self_opponent_possible_positions:")
