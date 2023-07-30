@@ -84,6 +84,7 @@ class StrategicPlayer(Player):
             result = json_data["result"]
             if "attacked" in result:
                 attacked_pos = result["attacked"]["position"]
+                x, y = attacked_pos 
                 if "hit" in result["attacked"]:
                     self.opnnent_certain_positions.append(attacked_pos)
                     self.opponent_HP -= 1
