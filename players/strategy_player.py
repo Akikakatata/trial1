@@ -4,6 +4,7 @@ import random
 import socket
 import sys
 import logging
+import time 
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("StrategicPlayer")
@@ -13,8 +14,13 @@ from lib.player_base import Player, PlayerShip
 
 class StrategicPlayer(Player):
 
-    def __init__(self, seed=0):
+    def __init__(self, seed=None):
+        if seed is None:
+            # Generate a random seed based on current time
+            seed = int(time.time())
+
         random.seed(seed)
+
 
         # Initialize the field as a 2x2 grid
         self.field = [[i, j] for i in range(Player.FIELD_SIZE)
