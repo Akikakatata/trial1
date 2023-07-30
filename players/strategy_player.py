@@ -103,6 +103,7 @@ class StrategicPlayer(Player):
 
             return json.dumps(self.attack(to))
 
+
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
 
@@ -111,16 +112,19 @@ def main(host, port, seed=0):
         with sock.makefile(mode='rw', buffering=1) as sockfile:
             get_msg = sockfile.readline()
             print(get_msg)
-            player = StrategicPlayer(seed=seed)
-            sockfile.write(player.initial_condition() + '\n')
+            player = StrategicPlayer()
+            sockfile.write(player.initial_condition()+'\n')
 
             while True:
                 info = sockfile.readline().rstrip()
                 print(info)
                 if info == "your turn":
-                    sockfile.write(player.action() + '\n')
+                    sockfile.write(player.action()+'\n')
+                    get_msg = sockfile.readline()
+                    player.update(get_msg)
                 elif info == "waiting":
-                    pass
+                    get_msg = sockfile.readline()
+                    player.update(get_msg)
                 elif info == "you win":
                     break
                 elif info == "you lose":
@@ -131,13 +135,8 @@ def main(host, port, seed=0):
                     continue
                 else:
                     print(info)
-                    raise RuntimeError("unknown information " + info)
+                    raise RuntimeError("unknown information "+info)
 
-                # Receive opponent's action and update player's data
-                get_msg = sockfile.readline()
-                player.update_self_opponent_possible_positions(get_msg)
-
-    print("Game over.")
 
 
 if __name__ == '__main__':
