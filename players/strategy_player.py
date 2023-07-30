@@ -45,7 +45,7 @@ class StrategicPlayer(Player):
                 super().__init__(self.positions)
                 break
 
-        self.opppnent_possible_positions = {
+        self.opponent_possible_positions = {
             's': [],
             'w': [],
             'c': []
