@@ -57,28 +57,32 @@ class StrategicPlayer(Player):
             result = json_data["result"]
             if "attacked" in result:
                 attacked_pos = result["attacked"]["position"]
-                # Calculate the 9 cells around the attacked position
                 around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
                                 for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
                                 if Player.in_field((x, y))]
+
+                # Remove destroyed ships from the possible positions list
+                for ship_type, positions in self.opppnent_possible_positions.items():
+                    if attacked_pos in positions:
+                        positions.remove(attacked_pos)
 
                 # Find the common positions between the previous self.opppnent_possible_positions
                 # and the 9 cells around the attacked position
                 self.opppnent_possible_positions = {k: [pos for pos in v if pos in around_attacked]
                                                     for k, v in self.opppnent_possible_positions.items()}
-
             elif "moved" in result:
-                ship_type = result["moved"]["ship"]
+                moved_ship_type = result["moved"]["ship"]
                 num_arrows = result["moved"]["distance"]
-                # Update possible positions only for the specific ship that moved
-                possible_positions = self.opppnent_possible_positions.get(ship_type, [])
-                for pos in possible_positions:
-                    new_pos = (pos[0] + num_arrows[0], pos[1] + num_arrows[1])
-                    if new_pos in self.field:
-                        pos[0], pos[1] = new_pos
+                moved_ship = self.ships[moved_ship_type]
+                new_pos = (moved_ship.position[0] + num_arrows[0], moved_ship.position[1] + num_arrows[1])
+                if Player.in_field(new_pos):
+                    # Update the possible positions list for the moved ship only
+                    self.opppnent_possible_positions[moved_ship_type] = [new_pos]
+
                 # Remove positions that are outside the field
-                self.opppnent_possible_positions[ship_type] = [pos for pos in possible_positions if pos in self.field]
-    
+                for ship_type, positions in self.opppnent_possible_positions.items():
+                    self.opppnent_possible_positions[ship_type] = [pos for pos in positions if Player.in_field(pos)]
+
     def action(self):
         act = random.choice(["move", "attack"])
         if act == "move":
