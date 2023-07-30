@@ -74,10 +74,25 @@ class StrategicPlayer(Player):
                         if new_pos in self.field:
                             self.opponent_possible_positions.append(new_pos)
 
-
+    def update_after_action(self, result):
+        if "attacked" in result:
+            attacked_pos = result["attacked"]["position"]
+            if "hit" in result["attacked"]:
+                self.opnnent_certain_positions.append(attacked_pos)
+                self.opponent_HP -= 1
+            elif "near" in result["attacked"]:
+                around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
+                                    for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
+                                    if (x, y) in self.field]
+                self.opponent_possible_positions.extend(around_attacked)        
+    
     def action(self):
-        
-        act = random.choice(["move", "attack"])
+        if self.opponent_HP < self.player_HP:
+            act = random.choices(["move", "attack"], [2, 5], k=1)[0]
+        elif self.opponent_HP > self.player_HP:
+            act = random.choices(["move", "attack"], [5, 2], k=1)[0]
+        else:
+            act = random.choice(["move", "attack"])
 
         print(f"Opponent's Possible Positions:")
         print(self.opponent_possible_positions)
@@ -114,8 +129,7 @@ class StrategicPlayer(Player):
                 while not self.can_attack(to):
                     to = random.choice(self.field)
                 return json.dumps(self.attack(to))
-            if "hit" in result["attacked"] and "near" not in result:
-                self.opponent_HP -= 1
+            
 
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
@@ -139,6 +153,7 @@ def main(host, port, seed=0):
                 if info == "your turn":
                     sockfile.write(player.action()+'\n')
                     get_msg = sockfile.readline()
+                    player.update_after_action(get_msg)
                 elif info == "waiting":
                     get_msg = sockfile.readline()
                     player.update_self_opponent_possible_positions(get_msg)
