@@ -52,55 +52,57 @@ class StrategicPlayer(Player):
         }
         
     def update_self_opponent_possible_positions(self, json_str):
-        json_data = json.loads(json_str)
-        if "result" in json_data:
-            result = json_data["result"]
-            if "attacked" in result:
-                attacked_pos = result["attacked"]["position"]
-                # Calculate the 9 cells around the attacked position
-                around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
-                                for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
-                                if Player.in_field((x, y))]
-
-                # Find the common positions between the previous self.opppnent_possible_positions
-                # and the 9 cells around the attacked position
-                self.opppnent_possible_positions = {k: [pos for pos in v if pos in around_attacked]
-                                                    for k, v in self.opppnent_possible_positions.items()}
-
-            elif "moved" in result:
-                ship_type = result["moved"]["ship"]
-                num_arrows = result["moved"]["distance"]
-                # Update possible positions only for the specific ship that moved
-                possible_positions = self.opppnent_possible_positions.get(ship_type, [])
-                for pos in possible_positions:
-                    new_pos = (pos[0] + num_arrows[0], pos[1] + num_arrows[1])
-                    if new_pos in self.field:
-                        pos[0], pos[1] = new_pos
-                # Remove positions that are outside the field
-                self.opppnent_possible_positions[ship_type] = [pos for pos in possible_positions if pos in self.field]
-    
+            json_data = json.loads(json_str)
+            if "result" in json_data:
+                result = json_data["result"]
+                if "attacked" in result:
+                    attacked_pos = result["attacked"]["position"]
+                    # Calculate the 9 cells around the attacked position
+                    around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
+                                    for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
+                                    if (x, y) in self.field]
+                    # Find the common positions between the previous self.opppnent_possible_positions
+                    # and the 9 cells around the attacked position
+                    self.opppnent_possible_positions = {k: [pos for pos in v if pos in around_attacked]
+                                                        for k, v in self.opppnent_possible_positions.items()}
+                elif "moved" in result:
+                    num_arrows = result["moved"]["distance"]
+                    # Update possible positions based on the direction and number of arrows
+                    for k, v in self.opppnent_possible_positions.items():
+                        for pos in v:
+                            new_pos = (pos[0] + num_arrows[0], pos[1] + num_arrows[1])
+                            if new_pos in self.field:
+                                pos[0], pos[1] = new_pos
+                    # Remove positions that are outside the field
+                    self.opppnent_possible_positions = {k: [pos for pos in v if pos in self.field]
+                                                        for k, v in self.opppnent_possible_positions.items()}
     def action(self):
         act = random.choice(["move", "attack"])
+
+        print(f"Opponent's Possible Positions:")
+        for ship_type, positions in self.opppnent_possible_positions.items():
+            print(f"{ship_type}: {positions}")
+
         if act == "move":
             ship = random.choice(list(self.ships.values()))
-            max_attempts = 100  # Set a maximum number of attempts to find a valid position
-            for _ in range(max_attempts):
+            while True:
                 to = random.choice(self.field)
-                if ship.can_reach(to) and self.overlap(to) is None:
-                    valid_move = True  # Flag to check if the position is valid for all ships
-                    for other_ship in self.ships.values():
-                        if other_ship != ship:
-                            pos1 = list(to)
-                            pos2 = other_ship.position
-                            x1, y1 = pos1
-                            x2, y2 = pos2
-                            if ((x1 == x2) or (y1 == y2)) or (abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1):
-                                valid_move = False
-                                break
-                    if valid_move:
-                        return json.dumps(self.move(ship.type, to))
-            # If no valid move is found after the maximum attempts, return None
-            return None
+                while not ship.can_reach(to) or not self.overlap(to) is None:
+                    to = random.choice(self.field)
+                validation = "fit"
+                for i in range(len(self.positions)):
+                    for j in range(i + 1, len(self.positions)):
+                        pos1 = list(to)
+                        pos2 = self.positions[list(self.positions.keys())[j]]
+                        x1, y1 = pos1
+                        x2, y2 = pos2
+                        if ((x1 == x2) or (y1 == y2)) or (abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1):
+                            validation = "unfit"
+                            break
+                    if validation == "unfit":
+                        break
+                if validation == "fit":
+                    return json.dumps(self.move(ship.type, to))
 
         elif act == "attack":
             ship_type = random.choice(list(self.opppnent_possible_positions.keys()))
