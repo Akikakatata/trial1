@@ -121,7 +121,7 @@ class StrategicPlayer(Player):
         if act == "move":
             ship_type = random.choice(['s', 'w', 'c'])
             to = random.choice(self.field)
-            while not ship_type.can_reach(to) or not self.overlap(to) is None:
+            while not self.ships[ship_type].can_reach(to) or not self.overlap(to) is None:
                 to = random.choice(self.field)
             return json.dumps(self.move(ship_type, to)) 
         elif act == "attack":
@@ -138,6 +138,7 @@ class StrategicPlayer(Player):
                 while not self.can_attack(to):
                     to = random.choice(self.field)
                 return json.dumps(self.attack(to))
+
 
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
