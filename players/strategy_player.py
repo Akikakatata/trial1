@@ -72,15 +72,11 @@ class StrategicPlayer(Player):
             elif "moved" in result:
                 movement = result["moved"]["distance"]
                 # Calculate new positions for each individual position in the opponent_possible_positions list
-                new_possible_positions = []
                 for pos in self.opponent_possible_positions:
                     x, y = pos
                     new_pos = (x + movement[0], y + movement[1])
-                    if new_pos in self.field:
-                        new_possible_positions.append(new_pos)
-                # Update opponent_possible_positions with the new calculated positions
-                if new_pos in new_possible_positions not in self.opponent_possible_positions:
-                    self.opponent_possible_positions.append(new_pos)
+                    if new_pos in self.field and not in self.opponent_possible_positions:
+                        self.opponent_possible_positions.append(new_pos)
 
     def update_after_action(self, json_str):
         print("Received JSON Data in update_after_action:")
