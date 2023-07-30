@@ -125,11 +125,12 @@ class StrategicPlayer(Player):
                 to = random.choice(self.field)
             return json.dumps(self.move(ship_type, to)) 
         elif act == "attack":
-            if self.opponent_possible_positions:
+            if any(self.opponent_possible_positions.values()):  # Check if there are any non-empty lists
                 ship_type = random.choice(list(self.opponent_possible_positions.keys()))
-                to = self.opponent_possible_positions.get(ship_type, [])
-                while not self.can_attack(to):
-                    to = random.choice(self.opponent_possible_positions[ship_type])
+                possible_positions = self.opponent_possible_positions.get(ship_type, [])
+                while not self.can_attack(possible_positions):
+                    possible_positions = self.opponent_possible_positions.get(ship_type, [])
+                to = random.choice(possible_positions)
                 return json.dumps(self.attack(to))
             else:
                 # Choose a random cell in the field since no opponent's positions are available
@@ -137,9 +138,8 @@ class StrategicPlayer(Player):
                 while not self.can_attack(to):
                     to = random.choice(self.field)
                 return json.dumps(self.attack(to))
-           
 
-def main(host, port, seed=0):
+    def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
