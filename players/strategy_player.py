@@ -71,7 +71,7 @@ class StrategicPlayer(Player):
                 # Add the 8 cells around the attacked position to possible opponent position list
                 for new_pos in around_attacked:
                     if new_pos not in self.opponent_possible_positions:
-                        self.opponent_possible_positions.extend(new_pos)
+                        self.opponent_possible_positions[ship_type].append(new_pos)
                 if "hit" in result["attacked"] and "near" not in result:
                     self.player_HP -= 1
             elif "moved" in result:
@@ -127,7 +127,7 @@ class StrategicPlayer(Player):
                 ship_type = random.choice(list(self.opponent_possible_positions.keys()))
                 to = self.opponent_possible_positions.get(ship_type, [])
                 while not self.can_attack(to):
-                    to = random.choice(self.opponent_possible_positions)
+                    to = random.choice(self.opponent_possible_positions[ship_type])
                 return json.dumps(self.attack(to))
             else:
                 # Choose a random cell in the field since no opponent's positions are available
