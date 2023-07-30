@@ -45,11 +45,7 @@ class StrategicPlayer(Player):
                 super().__init__(self.positions)
                 break
 
-        self.opponent_possible_positions = {
-            's': [],
-            'w': [],
-            'c': []
-        }        
+        self.opppnent_possible_positions =  []
         self.opnnent_certain_positions = []
         self.opponent_HP = 6
         self.player_HP = 6
@@ -58,34 +54,30 @@ class StrategicPlayer(Player):
     def update_self_opponent_possible_positions(self, json_str):
         print("Received JSON Data in update_self_opponent_possible_positions:")
         print(json_str)
-        json_data = json.loads(json_str)
+        json_data = json.loads(json_str) 
         if "result" in json_data:
             result = json_data["result"]
             if "attacked" in result:
                 attacked_pos = result["attacked"]["position"]
                 x, y = attacked_pos
                 # Calculate the 8 cells around the attacked position
-                around_attacked = [(x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1), (x, y + 1), (x + 1, y - 1),
-                                (x + 1, y), (x + 1, y + 1)]
+                around_attacked = [(x-1, y-1), (x-1, y), (x-1, y+1), (x, y-1), (x, y+1), (x+1, y-1), (x+1, y), (x+1, y+1)]
                 print(around_attacked)
-                # Add the 8 cells around the attacked position to possible opponent position list
+                # Add the 8 cells around the attacked position to possible opponent position list 
                 for new_pos in around_attacked:
-                    if new_pos in self.field:
-                        for ship_type in self.opponent_possible_positions:
-                            if new_pos not in self.opponent_possible_positions[ship_type]:
-                                self.opponent_possible_positions[ship_type].append(new_pos)
+                    if new_pos not in self.opponent_possible_positions:
+                        self.opponent_possible_positions.extend(new_pos)
                 if "hit" in result["attacked"] and "near" not in result:
                     self.player_HP -= 1
             elif "moved" in result:
-                ship_type = result["moved"]["ship"]
                 num_arrows = result["moved"]["distance"]
                 # Update possible positions based on the direction and number of arrows
-                if ship_type in self.opponent_possible_positions:
-                    for pos in self.opponent_possible_positions[ship_type].copy():  # Create a copy before iterating
-                        for i in range(1, num_arrows[0] + 1):
-                            new_pos = (pos[0] + i * num_arrows[0], pos[1] + i * num_arrows[1])
-                            if new_pos in self.field:
-                                self.opponent_possible_positions[ship_type].append(new_pos)
+                for pos in self.opponent_possible_positions.copy():  # Create a copy before iterating
+                    for i in range(1, num_arrows[0] + 1):
+                        new_pos = (pos[0] + i * num_arrows[0], pos[1] + i * num_arrows[1])
+                        if new_pos in self.field:
+                            self.opponent_possible_positions.append(new_pos)
+
     def update_after_action(self, json_str):
         print("Received JSON Data in update_after_action:")
         print(json_str)
@@ -102,10 +94,8 @@ class StrategicPlayer(Player):
                     around_attacked = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
                     print(around_attacked)
                     for new_pos in around_attacked:
-                        if new_pos in self.field:
-                            for ship_type in self.opponent_possible_positions:
-                                if new_pos not in self.opponent_possible_positions[ship_type]:
-                                    self.opponent_possible_positions[ship_type].append(new_pos)
+                        if new_pos not in self.opponent_possible_positions:
+                            self.opponent_possible_positions.append(new_pos)
 
     def action(self):
         if self.opponent_HP < self.player_HP:
@@ -119,18 +109,16 @@ class StrategicPlayer(Player):
         print(self.opponent_possible_positions)
 
         if act == "move":
-            ship_type = random.choice(['s', 'w', 'c'])
+            ship = random.choice(list(self.ships.values()))
             to = random.choice(self.field)
-            while not self.ships[ship_type].can_reach(to) or not self.overlap(to) is None:
+            while not ship.can_reach(to) or not self.overlap(to) is None:
                 to = random.choice(self.field)
-            return json.dumps(self.move(ship_type, to)) 
+            return json.dumps(self.move(ship.type, to)) 
         elif act == "attack":
-            if any(self.opponent_possible_positions.values()):  # Check if there are any non-empty lists
-                ship_type = random.choice(list(self.opponent_possible_positions.keys()))
-                possible_positions = self.opponent_possible_positions.get(ship_type, [])
-                while not self.can_attack(possible_positions):
-                    possible_positions = self.opponent_possible_positions.get(ship_type, [])
-                to = random.choice(possible_positions)
+            if self.opponent_possible_positions:
+                to = random.choice(self.opponent_possible_positions)
+                while not self.can_attack(to):
+                    to = random.choice(self.opponent_possible_positions)
                 return json.dumps(self.attack(to))
             else:
                 # Choose a random cell in the field since no opponent's positions are available
@@ -138,7 +126,7 @@ class StrategicPlayer(Player):
                 while not self.can_attack(to):
                     to = random.choice(self.field)
                 return json.dumps(self.attack(to))
-
+            
 
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
@@ -212,3 +200,10 @@ if __name__ == '__main__':
         sys.exit(1)
 
     main(args.host, args.port, seed=args.seed)
+
+
+
+
+
+
+
