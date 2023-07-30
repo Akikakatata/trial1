@@ -61,7 +61,7 @@ class StrategicPlayer(Player):
                 attacked_pos = result["attacked"]["position"]
                 x, y = attacked_pos
                 # Calculate the 8 cells around the attacked position
-                around_attacked = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
+                around_attacked = [(x-1, y-1), (x-1, y), (x-1, y+1), (x, y-1), (x, y+1), (x+1, y-1), (x+1, y), (x+1, y+1)]
                 print(around_attacked)
                 # Add the 8 cells around the attacked position to possible opponent position list 
                 self.opponent_possible_positions.extend(around_attacked)
@@ -71,7 +71,7 @@ class StrategicPlayer(Player):
                 num_arrows = result["moved"]["distance"]
                 # Update possible positions based on the direction and number of arrows
                 for pos in self.opponent_possible_positions.copy():  # Create a copy before iterating
-                    for i in range(1, num_arrows + 1):
+                    for i in range(1, num_arrows[0] + 1):
                         new_pos = (pos[0] + i * num_arrows[0], pos[1] + i * num_arrows[1])
                         if new_pos in self.field:
                             self.opponent_possible_positions.append(new_pos)
