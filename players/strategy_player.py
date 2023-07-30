@@ -52,8 +52,9 @@ class StrategicPlayer(Player):
 
 
     def update_self_opponent_possible_positions(self, json_str):
-        json_data = json.loads(json_str)
-        if "result" in json_data:
+        print("Received JSON Data in update_self_opponent_possible_positions:")
+        print(json_str)
+        json_data = json.loads(json_str) if "result" in json_data:
             result = json_data["result"]
             if "attacked" in result:
                 attacked_pos = result["attacked"]["position"]
@@ -75,6 +76,8 @@ class StrategicPlayer(Player):
                             self.opponent_possible_positions.append(new_pos)
 
     def update_after_action(self, json_str):
+        print("Received JSON Data in update_after_action:")
+        print(json_str)
         json_data = json.loads(json_str)
         if "result" in json_data:
             result = json_data["result"]
