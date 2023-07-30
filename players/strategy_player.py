@@ -79,7 +79,28 @@ class StrategicPlayer(Player):
 
     def action(self):
         act = random.choice(["move", "attack"])
-
+        if act == "move":
+            ship = random.choice(list(self.ships.values()))
+            max_attempts = 100  # Set a maximum number of attempts to find a valid position
+            for _ in range(max_attempts):
+                to = random.choice(self.field)
+                if ship.can_reach(to) and self.overlap(to) is None:
+                    validation = "fit"
+                    for i in range(len(self.positions)):
+                        for j in range(i + 1, len(self.positions)):
+                            pos1 = list(to)
+                            pos2 = self.positions[list(self.positions.keys())[j]]
+                            x1, y1 = pos1
+                            x2, y2 = pos2
+                            if ((x1 == x2) or (y1 == y2)) or (abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1):
+                                validation = "unfit"
+                                break
+                        if validation == "unfit":
+                            break
+                    if validation == "fit":
+                        return json.dumps(self.move(ship.type, to))
+            # If no valid move is found after the maximum attempts, return None
+            return None
         if act == "move":
             ship = random.choice(list(self.ships.values()))
             while True:
