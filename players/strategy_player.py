@@ -109,7 +109,7 @@ class StrategicPlayer(Player):
             to = random.choice(self.field)
             while not ship.can_reach(to) or not self.overlap(to) is None:
                 to = random.choice(self.field)
-
+            return json.dumps(self.move(ship.type, to)) 
         elif act == "attack":
             if self.opponent_possible_positions:
                 to = random.choice(self.opponent_possible_positions)
