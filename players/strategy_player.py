@@ -74,18 +74,21 @@ class StrategicPlayer(Player):
                         if new_pos in self.field:
                             self.opponent_possible_positions.append(new_pos)
 
-    def update_after_action(self, result):
-        if "attacked" in result:
-            attacked_pos = result["attacked"]["position"]
-            if "hit" in result["attacked"]:
-                self.opnnent_certain_positions.append(attacked_pos)
-                self.opponent_HP -= 1
-            elif "near" in result["attacked"]:
-                around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
-                                    for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
-                                    if (x, y) in self.field]
-                self.opponent_possible_positions.extend(around_attacked)        
-    
+    def update_after_action(self, json_str):
+        json_data = json.loads(json_str)
+        if "result" in json_data:
+            result = json_data["result"]
+            if "attacked" in result:
+                attacked_pos = result["attacked"]["position"]
+                if "hit" in result["attacked"]:
+                    self.opnnent_certain_positions.append(attacked_pos)
+                    self.opponent_HP -= 1
+                elif "near" in result["attacked"]:
+                    around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
+                                        for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
+                                        if (x, y) in self.field]
+                    self.opponent_possible_positions.extend(around_attacked)
+
     def action(self):
         if self.opponent_HP < self.player_HP:
             act = random.choices(["move", "attack"], [2, 5], k=1)[0]
