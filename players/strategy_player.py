@@ -1,3 +1,4 @@
+
 import json
 import os
 import random
@@ -45,6 +46,9 @@ class StrategicPlayer(Player):
             'w': [pos.copy() for pos in self.field],
             'c': [pos.copy() for pos in self.field]
         }
+        
+        # Call the initialize_ships method after the field has been created
+        self.initialize_ships()
         
     def update_self_opponent_possible_positions(self, json_str):
         json_data = json.loads(json_str)
