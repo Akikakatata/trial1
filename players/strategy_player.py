@@ -54,7 +54,8 @@ class StrategicPlayer(Player):
     def update_self_opponent_possible_positions(self, json_str):
         print("Received JSON Data in update_self_opponent_possible_positions:")
         print(json_str)
-        json_data = json.loads(json_str) if "result" in json_data:
+        json_data = json.loads(json_str) 
+        if "result" in json_data:
             result = json_data["result"]
             if "attacked" in result:
                 attacked_pos = result["attacked"]["position"]
