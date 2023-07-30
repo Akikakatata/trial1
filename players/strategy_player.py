@@ -79,6 +79,8 @@ class StrategicPlayer(Player):
             ship = random.choice(list(self.ships.values()))
             while True:
                 to = random.choice(self.field)
+                while not ship.can_reach(to) or not self.overlap(to) is None:
+                    to = random.choice(self.field)
                 validation = "fit"
                 for i in range(len(self.positions)):
                     for j in range(i + 1, len(self.positions)):
