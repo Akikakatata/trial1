@@ -58,18 +58,18 @@ class StrategicPlayer(Player):
                 around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
                                 for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
                                 if (x, y) in self.field]
-
-                # Find the overlap between the previous possible positions and the 9 cells around the attacked position
-                self.opponent_possible_positions = self.opponent_possible_positions + around_attacked
+                # Add the 9 cells around the attacked position to possible opponent position list 
+                self.opponent_possible_positions.extend(around_attacked)
 
             elif "moved" in result:
                 num_arrows = result["moved"]["distance"]
                 # Update possible positions based on the direction and number of arrows
-                for pos in self.opponent_possible_positions:
+                for pos in self.opponent_possible_positions.copy():  # Create a copy before iterating
                     for i in range(1, num_arrows + 1):
                         new_pos = (pos[0] + i * num_arrows[0], pos[1] + i * num_arrows[1])
                         if new_pos in self.field:
                             self.opponent_possible_positions.append(new_pos)
+
 
     def action(self):
         act = random.choice(["move", "attack"])
@@ -99,24 +99,16 @@ class StrategicPlayer(Player):
                     return json.dumps(self.move(ship.type, to))
         elif act == "attack":
             if self.opponent_possible_positions:
-                ship_type = random.choice(list(self.opponent_possible_positions))
                 to = random.choice(self.opponent_possible_positions)
                 while not self.can_attack(to):
-                    if self.opponent_possible_positions:
-                        ship_type = random.choice(list(self.opponent_possible_positions))
-                        to = random.choice(self.opponent_possible_positions)
-                    else:
-                        break
-            else:
-                # Choose a random cell in the field since no opponent's positions are available
-                ship_type = random.choice(list(self.ships.keys()))
-                to = random.choice(self.field)
-
-            if self.can_attack(to):
+                    to = random.choice(self.opponent_possible_positions)
                 return json.dumps(self.attack(to))
             else:
-                return json.dumps(self.move(ship_type, to))  # Move if attack not possible
-
+                # Choose a random cell in the field since no opponent's positions are available
+                to = random.choice(self.field)
+                while not self.can_attack(to):
+                    to = random.choice(self.field)
+                return json.dumps(self.attack(to))
 
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
