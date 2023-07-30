@@ -50,7 +50,7 @@ class StrategicPlayer(Player):
             'w': [pos.copy() for pos in self.field],
             'c': [pos.copy() for pos in self.field]
         }
-       
+
     def update_self_opponent_possible_positions(self, json_str):
         json_data = json.loads(json_str)
         if "result" in json_data:
@@ -63,7 +63,10 @@ class StrategicPlayer(Player):
                                    if (x, y) in self.field]
                 # Find the overlap between the previous possible positions and the 9 cells around the attacked position
                 for ship_type, positions in self.opppnent_possible_positions.items():
-                    self.opppnent_possible_positions[ship_type] = list(set(positions) & set(around_attacked))
+                    self.opppnent_possible_positions[ship_type] = list(set(map(tuple, positions)) & set(around_attacked))
+                # Convert the positions back to lists
+                for ship_type, positions in self.opppnent_possible_positions.items():
+                    self.opppnent_possible_positions[ship_type] = [list(pos) for pos in positions]
             elif "moved" in result:
                 num_arrows = result["moved"]["distance"]
                 # Update possible positions based on the direction and number of arrows
@@ -77,6 +80,7 @@ class StrategicPlayer(Player):
                     k: [pos for pos in v if pos in self.field]
                     for k, v in self.opppnent_possible_positions.items()
                 }
+                
     def action(self):
         act = random.choice(["move", "attack"])
 
