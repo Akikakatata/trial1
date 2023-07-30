@@ -94,8 +94,7 @@ class StrategicPlayer(Player):
         act = random.choice(["move", "attack"])
 
         print(f"Opponent's Possible Positions:")
-        for ship_type, positions in self.opponent_possible_positions.items():
-            print(f"{ship_type}: {positions}")
+        print(self.opponent_possible_positions)
 
         if act == "move":
             ship = random.choice(list(self.ships.values()))
@@ -118,12 +117,23 @@ class StrategicPlayer(Player):
                 if validation == "fit":
                     return json.dumps(self.move(ship.type, to))
         elif act == "attack":
-            ship_type = random.choice(list(self.opponent_possible_positions.keys()))
-            to = random.choice(self.opponent_possible_positions[ship_type])
-            while not self.can_attack(to):
-                ship_type = random.choice(list(self.opponent_possible_positions.keys()))
-                to = random.choice(self.opponent_possible_positions[ship_type])
+            if self.opponent_possible_positions:
+                ship_type = random.choice(list(self.opponent_possible_positions))
+                to = random.choice(self.opponent_possible_positions)
+                while not self.can_attack(to):
+                    if self.opponent_possible_positions:
+                        ship_type = random.choice(list(self.opponent_possible_positions))
+                        to = random.choice(self.opponent_possible_positions)
+                    else:
+                        break
+            else:
+                ship_type = random.choice(list(self.opponent_possible_positions))
+                to = random.choice(self.opponent_possible_positions))
 
+            if self.can_attack(to):
+                return json.dumps(self.attack(to))
+            else:
+                return json.dumps(self.move(ship_type, to))  # Move if attack not possible
 
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
