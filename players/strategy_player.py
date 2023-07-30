@@ -116,7 +116,29 @@ class StrategicPlayer(Player):
                 ship_type = random.choice(list(self.opppnent_possible_positions.keys()))
                 to = random.choice(self.opppnent_possible_positions[ship_type])
 
-            return json.dumps(self.attack(to))
+            # Make the attack
+            server_response = self.attack(to)
+            server_response_data = json.loads(server_response)
+
+            # Check if the attack hit near a ship
+            if "near" in server_response_data and server_response_data["near"] in ["w", "c", "s"]:
+                # Get the attacked position from the server response
+                attacked_pos = server_response_data["position"]
+
+                # Calculate the 9 cells around the attacked position
+                around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
+                                for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
+                                if (x, y) in self.field]
+
+                # Find the overlap between the previous possible positions and the 9 cells around the attacked position
+                self.opppnent_possible_positions[server_response_data["near"]] = list(
+                    set(map(tuple, self.opppnent_possible_positions[server_response_data["near"]])) & set(around_attacked)
+                )
+
+                # Convert the positions back to lists
+                self.opppnent_possible_positions[server_response_data["near"]] = [list(pos) for pos in self.opppnent_possible_positions[server_response_data["near"]]]
+
+            return json.dumps(server_response_data)
 
 
 def main(host, port, seed=0):
