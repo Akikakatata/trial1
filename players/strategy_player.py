@@ -85,26 +85,31 @@ class StrategicPlayer(Player):
 
     def action(self):
         act = random.choice(["move", "attack"])
+
+        print(f"Opponent's Possible Positions:")
+        for ship_type, positions in self.opppnent_possible_positions.items():
+            print(f"{ship_type}: {positions}")
+
         if act == "move":
             ship = random.choice(list(self.ships.values()))
-            max_attempts = 100  # Set a maximum number of attempts to find a valid position
-            for _ in range(max_attempts):
+            while True:
                 to = random.choice(self.field)
-                if ship.can_reach(to) and self.overlap(to) is None:
-                    valid_move = True  # Flag to check if the position is valid for all ships
-                    for other_ship in self.ships.values():
-                        if other_ship != ship:
-                            pos1 = list(to)
-                            pos2 = other_ship.position
-                            x1, y1 = pos1
-                            x2, y2 = pos2
-                            if ((x1 == x2) or (y1 == y2)) or (abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1):
-                                valid_move = False
-                                break
-                    if valid_move:
-                        return json.dumps(self.move(ship.type, to))
-            # If no valid move is found after the maximum attempts, return None
-            return None
+                while not ship.can_reach(to) or not self.overlap(to) is None:
+                    to = random.choice(self.field)
+                validation = "fit"
+                for i in range(len(self.positions)):
+                    for j in range(i + 1, len(self.positions)):
+                        pos1 = list(to)
+                        pos2 = self.positions[list(self.positions.keys())[j]]
+                        x1, y1 = pos1
+                        x2, y2 = pos2
+                        if ((x1 == x2) or (y1 == y2)) or (abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1):
+                            validation = "unfit"
+                            break
+                    if validation == "unfit":
+                        break
+                if validation == "fit":
+                    return json.dumps(self.move(ship.type, to))
 
         elif act == "attack":
             ship_type = random.choice(list(self.opppnent_possible_positions.keys()))
@@ -113,7 +118,7 @@ class StrategicPlayer(Player):
                 ship_type = random.choice(list(self.opppnent_possible_positions.keys()))
                 to = random.choice(self.opppnent_possible_positions[ship_type])
 
-            return json.dumps(self.attack(to))
+            return json.dumps(self.attack(to)) 
 
 
 def main(host, port, seed=0):
