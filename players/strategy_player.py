@@ -60,11 +60,13 @@ class StrategicPlayer(Player):
                 # Calculate the 9 cells around the attacked position
                 around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
                                 for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
-                                if (x, y) in self.field]
+                                if Player.in_field((x, y))]
+
                 # Find the common positions between the previous self.opppnent_possible_positions
                 # and the 9 cells around the attacked position
                 self.opppnent_possible_positions = {k: [pos for pos in v if pos in around_attacked]
                                                     for k, v in self.opppnent_possible_positions.items()}
+
             elif "moved" in result:
                 ship_type = result["moved"]["ship"]
                 num_arrows = result["moved"]["distance"]
