@@ -77,7 +77,7 @@ class StrategicPlayer(Player):
                 # Remove positions that are outside the field
                 self.opppnent_possible_positions[ship_type] = [pos for pos in possible_positions if pos in self.field]
     
-   def action(self):
+    def action(self):
         act = random.choice(["move", "attack"])
         if act == "move":
             ship = random.choice(list(self.ships.values()))
