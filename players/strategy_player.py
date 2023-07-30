@@ -59,12 +59,11 @@ class StrategicPlayer(Player):
             result = json_data["result"]
             if "attacked" in result:
                 attacked_pos = result["attacked"]["position"]
-                # Calculate the 9 cells around the attacked position
-                around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
-                                for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
-                                if (x, y) in self.field]
+                x, y = attacked_pos
+                # Calculate the 8 cells around the attacked position
+                around_attacked = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
                 print(around_attacked)
-                # Add the 9 cells around the attacked position to possible opponent position list 
+                # Add the 8 cells around the attacked position to possible opponent position list 
                 self.opponent_possible_positions.extend(around_attacked)
                 if "hit" in result["attacked"] and "near" not in result:
                     self.player_HP -= 1
@@ -89,9 +88,7 @@ class StrategicPlayer(Player):
                     self.opnnent_certain_positions.append(attacked_pos)
                     self.opponent_HP -= 1
                 elif "near" in result["attacked"]:
-                    around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
-                                        for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
-                                        if (x, y) in self.field]
+                    around_attacked = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
                     print(around_attacked)
                     self.opponent_possible_positions.extend(around_attacked)
 
