@@ -3,6 +3,11 @@ import os
 import random
 import socket
 import sys
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("StrategicPlayer")
+
 sys.path.append(os.getcwd())
 from lib.player_base import Player, PlayerShip
 
@@ -110,36 +115,42 @@ def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.connect((host, port))
+        try:
+            sock.connect((host, port))
+        except Exception as e:
+            logger.error(f"Error connecting to the server: {e}")
+            sys.exit(1)
+
         with sock.makefile(mode='rw', buffering=1) as sockfile:
             get_msg = sockfile.readline()
-            print(get_msg)
-            player = StrategicPlayer()
+            logger.debug(get_msg)
+            player = StrategicPlayer(seed=seed)
             sockfile.write(player.initial_condition()+'\n')
 
             while True:
                 info = sockfile.readline().rstrip()
-                print(info)
+                logger.debug(info)
                 if info == "your turn":
                     sockfile.write(player.action()+'\n')
                     get_msg = sockfile.readline()
-                    player.update(get_msg)
+                    player.update_self_opponent_possible_positions(get_msg)
                 elif info == "waiting":
                     get_msg = sockfile.readline()
-                    player.update(get_msg)
+                    player.update_self_opponent_possible_positions(get_msg)
                 elif info == "you win":
+                    logger.info("You win!")
                     break
                 elif info == "you lose":
+                    logger.info("You lose!")
                     break
                 elif info == "even":
+                    logger.info("It's a tie (even)!")
                     break
                 elif not info:
                     continue
                 else:
-                    print(info)
-                    raise RuntimeError("unknown information "+info)
-
-
+                    logger.error("Unknown information received: " + info)
+                    raise RuntimeError("Unknown information: " + info)
 
 if __name__ == '__main__':
     import argparse
@@ -164,6 +175,11 @@ if __name__ == '__main__':
         required=False,
         default=0,
     )
-    args = parser.parse_args()
+
+    try:
+        args = parser.parse_args()
+    except SystemExit as e:
+        logger.error("Error parsing command-line arguments:", e)
+        sys.exit(1)
 
     main(args.host, args.port, seed=args.seed)
