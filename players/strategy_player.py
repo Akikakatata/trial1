@@ -58,31 +58,32 @@ class StrategicPlayer(Player):
     def update_self_opponent_possible_positions(self, json_str):
         print("Received JSON Data in update_self_opponent_possible_positions:")
         print(json_str)
-        json_data = json.loads(json_str) 
+        json_data = json.loads(json_str)
         if "result" in json_data:
             result = json_data["result"]
             if "attacked" in result:
                 attacked_pos = result["attacked"]["position"]
                 x, y = attacked_pos
                 # Calculate the 8 cells around the attacked position
-                around_attacked = [(x-1, y-1), (x-1, y), (x-1, y+1), (x, y-1), (x, y+1), (x+1, y-1), (x+1, y), (x+1, y+1)]
+                around_attacked = [(x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1), (x, y + 1), (x + 1, y - 1),
+                                (x + 1, y), (x + 1, y + 1)]
                 print(around_attacked)
-                # Add the 8 cells around the attacked position to possible opponent position list 
-                for ship_type in self.opponent_possible_positions:
-                    for new_pos in around_attacked:
-                        if new_pos not in self.opponent_possible_positions[ship_type]:
-                            self.opponent_possible_positions[ship_type].append(new_pos)
-
+                # Add the 8 cells around the attacked position to possible opponent position list
+                for new_pos in around_attacked:
+                    if new_pos not in self.opponent_possible_positions:
+                        self.opponent_possible_positions.extend(new_pos)
                 if "hit" in result["attacked"] and "near" not in result:
                     self.player_HP -= 1
-        elif "moved" in result:
-                moved_ship = result["moved"]["ship"]
+            elif "moved" in result:
+                ship_type = result["moved"]["ship"]
                 num_arrows = result["moved"]["distance"]
-                # Update possible positions for the specific ship that moved
-                for i in range(1, num_arrows[0] + 1):
-                    new_pos = (self.ships[moved_ship].position[0] + i * num_arrows[0], self.ships[moved_ship].position[1] + i * num_arrows[1])
-                    if new_pos in self.field:
-                        self.opponent_possible_positions[moved_ship].append(new_pos)
+                # Update possible positions based on the direction and number of arrows
+                if ship_type in self.opponent_possible_positions:
+                    for pos in self.opponent_possible_positions[ship_type].copy():  # Create a copy before iterating
+                        for i in range(1, num_arrows[0] + 1):
+                            new_pos = (pos[0] + i * num_arrows[0], pos[1] + i * num_arrows[1])
+                            if new_pos in self.field:
+                                self.opponent_possible_positions[ship_type].append(new_pos)
 
     def update_after_action(self, json_str):
         print("Received JSON Data in update_after_action:")
