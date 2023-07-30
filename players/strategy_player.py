@@ -45,7 +45,7 @@ class StrategicPlayer(Player):
                 super().__init__(self.positions)
                 break
 
-        self.opppnent_possible_positions = []
+        self.opponent_possible_positions = []
         self.opnnent_certain_positions = []
 
     def update_self_opponent_possible_positions(self, json_str):
@@ -94,7 +94,7 @@ class StrategicPlayer(Player):
         act = random.choice(["move", "attack"])
 
         print(f"Opponent's Possible Positions:")
-        for ship_type, positions in self.opppnent_possible_positions.items():
+        for ship_type, positions in self.opponent_possible_positions.items():
             print(f"{ship_type}: {positions}")
 
         if act == "move":
@@ -118,11 +118,11 @@ class StrategicPlayer(Player):
                 if validation == "fit":
                     return json.dumps(self.move(ship.type, to))
         elif act == "attack":
-            ship_type = random.choice(list(self.opppnent_possible_positions.keys()))
-            to = random.choice(self.opppnent_possible_positions[ship_type])
+            ship_type = random.choice(list(self.opponent_possible_positions.keys()))
+            to = random.choice(self.opponent_possible_positions[ship_type])
             while not self.can_attack(to):
-                ship_type = random.choice(list(self.opppnent_possible_positions.keys()))
-                to = random.choice(self.opppnent_possible_positions[ship_type])
+                ship_type = random.choice(list(self.opponent_possible_positions.keys()))
+                to = random.choice(self.opponent_possible_positions[ship_type])
 
 
 def main(host, port, seed=0):
