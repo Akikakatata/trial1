@@ -108,14 +108,12 @@ class StrategicPlayer(Player):
                         break
                 if validation == "fit":
                     return json.dumps(self.move(ship.type, to))
-
         elif act == "attack":
-            ship_type = random.choice(list(self.opppnent_possible_positions.keys()))
-            to = random.choice(self.opppnent_possible_positions[ship_type])
-
-            while not self.can_attack(to):
+            while True:
                 ship_type = random.choice(list(self.opppnent_possible_positions.keys()))
                 to = random.choice(self.opppnent_possible_positions[ship_type])
+                if self.can_attack(to):
+                    break
 
             response_json_str = self.attack(to)  # Perform the attack and get the server's response
             response_data = json.loads(response_json_str)
@@ -134,8 +132,6 @@ class StrategicPlayer(Player):
                 # Convert the positions back to lists
                 for ship_type, positions in self.opppnent_possible_positions.items():
                     self.opppnent_possible_positions[ship_type] = [list(pos) for pos in positions]
-
-
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
 
