@@ -71,7 +71,8 @@ class StrategicPlayer(Player):
                 # Add the 8 cells around the attacked position to possible opponent position list
                 for new_pos in around_attacked:
                     if new_pos not in self.opponent_possible_positions:
-                        self.opponent_possible_positions[ship_type].append(new_pos)
+                        if new_pos in self.field:
+                            self.opponent_possible_positions[ship_type].append(new_pos)
                 if "hit" in result["attacked"] and "near" not in result:
                     self.player_HP -= 1
             elif "moved" in result:
@@ -103,7 +104,8 @@ class StrategicPlayer(Player):
                     for ship_type in self.opponent_possible_positions:
                         for new_pos in around_attacked:
                             if new_pos not in self.opponent_possible_positions[ship_type]:
-                                self.opponent_possible_positions[ship_type].append(new_pos)
+                                if new_pos in self.field:
+                                    self.opponent_possible_positions[ship_type].append(new_pos)
 
     def action(self):
         if self.opponent_HP < self.player_HP:
