@@ -118,7 +118,7 @@ def update_self_opponent_possible_positions(self, json_str):
                 ship_type = random.choice(list(self.opppnent_possible_positions.keys()))
                 to = random.choice(self.opppnent_possible_positions[ship_type])
 
-            return json.dumps(self.attack(to)) 
+            return json.dumps(self.attack(to))
 
 
 def main(host, port, seed=0):
