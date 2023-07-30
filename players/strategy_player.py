@@ -137,7 +137,7 @@ class StrategicPlayer(Player):
                 while not self.can_attack(to):
                     to = random.choice(self.field)
                 return json.dumps(self.attack(to))
-            
+           
 
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
