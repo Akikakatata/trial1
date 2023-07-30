@@ -66,7 +66,7 @@ class StrategicPlayer(Player):
                 # Add the 8 cells around the attacked position to possible opponent position list 
                 for new_pos in around_attacked:
                     if new_pos not in self.opponent_possible_positions:
-                        self.opponent_possible_positions.extend(new_pos)
+                        self.opponent_possible_positions.append(new_pos)
                 if "hit" in result["attacked"] and "near" not in result:
                     self.player_HP -= 1
             elif "moved" in result:
