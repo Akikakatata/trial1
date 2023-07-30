@@ -76,7 +76,7 @@ class StrategicPlayer(Player):
                     for i in range(1, num_arrows[0] + 1):
                         new_pos = (pos[0] + i * num_arrows[0], pos[1] + i * num_arrows[1])
                         if new_pos in self.field:
-                            self.opponent_possible_positions.extend(new_pos)
+                            self.opponent_possible_positions.append(new_pos)
 
     def update_after_action(self, json_str):
         print("Received JSON Data in update_after_action:")
@@ -95,7 +95,7 @@ class StrategicPlayer(Player):
                     print(around_attacked)
                     for new_pos in around_attacked:
                         if new_pos not in self.opponent_possible_positions:
-                            self.opponent_possible_positions.extend(new_pos)
+                            self.opponent_possible_positions.append(new_pos)
 
     def action(self):
         if self.opponent_HP < self.player_HP:
