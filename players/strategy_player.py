@@ -72,7 +72,9 @@ class StrategicPlayer(Player):
                 for new_pos in around_attacked:
                     if new_pos not in self.opponent_possible_positions:
                         if new_pos in self.field:
-                            self.opponent_possible_positions[ship_type].append(new_pos)
+                            for ship_type in self.opponent_possible_positions:
+                                if new_pos not in self.opponent_possible_positions[ship_type]:
+                                    self.opponent_possible_positions[ship_type].append(new_pos)
                 if "hit" in result["attacked"] and "near" not in result:
                     self.player_HP -= 1
             elif "moved" in result:
@@ -85,7 +87,6 @@ class StrategicPlayer(Player):
                             new_pos = (pos[0] + i * num_arrows[0], pos[1] + i * num_arrows[1])
                             if new_pos in self.field:
                                 self.opponent_possible_positions[ship_type].append(new_pos)
-
     def update_after_action(self, json_str):
         print("Received JSON Data in update_after_action:")
         print(json_str)
