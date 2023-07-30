@@ -127,13 +127,15 @@ class StrategicPlayer(Player):
                     else:
                         break
             else:
-                ship_type = random.choice(list(self.opponent_possible_positions))
-                to = random.choice(self.opponent_possible_positions)
+                # Choose a random cell in the field since no opponent's positions are available
+                ship_type = random.choice(list(self.ships.keys()))
+                to = random.choice(self.field)
 
             if self.can_attack(to):
                 return json.dumps(self.attack(to))
             else:
                 return json.dumps(self.move(ship_type, to))  # Move if attack not possible
+
 
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
