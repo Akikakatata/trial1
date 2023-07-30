@@ -85,22 +85,21 @@ class StrategicPlayer(Player):
             for _ in range(max_attempts):
                 to = random.choice(self.field)
                 if ship.can_reach(to) and self.overlap(to) is None:
-                    validation = "fit"
-                    for i in range(len(self.positions)):
-                        for j in range(i + 1, len(self.positions)):
+                    valid_move = True  # Flag to check if the position is valid for all ships
+                    for other_ship in self.ships.values():
+                        if other_ship != ship:
                             pos1 = list(to)
-                            pos2 = self.positions[list(self.positions.keys())[j]]
+                            pos2 = other_ship.position
                             x1, y1 = pos1
                             x2, y2 = pos2
                             if ((x1 == x2) or (y1 == y2)) or (abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1):
-                                validation = "unfit"
+                                valid_move = False
                                 break
-                        if validation == "unfit":
-                            break
-                    if validation == "fit":
+                    if valid_move:
                         return json.dumps(self.move(ship.type, to))
             # If no valid move is found after the maximum attempts, return None
             return None
+
         elif act == "attack":
             ship_type = random.choice(list(self.opppnent_possible_positions.keys()))
             to = random.choice(self.opppnent_possible_positions[ship_type])
