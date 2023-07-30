@@ -50,32 +50,29 @@ class StrategicPlayer(Player):
             'w': [pos.copy() for pos in self.field],
             'c': [pos.copy() for pos in self.field]
         }
-        
+       
     def update_self_opponent_possible_positions(self, json_str):
-            json_data = json.loads(json_str)
-            if "result" in json_data:
-                result = json_data["result"]
-                if "attacked" in result:
-                    attacked_pos = result["attacked"]["position"]
-                    # Calculate the 9 cells around the attacked position
-                    around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
-                                    for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
-                                    if (x, y) in self.field]
-                    # Find the common positions between the previous self.opppnent_possible_positions
-                    # and the 9 cells around the attacked position
-                    self.opppnent_possible_positions = {k: [pos for pos in v if pos in around_attacked]
-                                                        for k, v in self.opppnent_possible_positions.items()}
-                elif "moved" in result:
-                    num_arrows = result["moved"]["distance"]
-                    # Update possible positions based on the direction and number of arrows
-                    for k, v in self.opppnent_possible_positions.items():
-                        for pos in v:
-                            new_pos = (pos[0] + num_arrows[0], pos[1] + num_arrows[1])
-                            if new_pos in self.field:
-                                pos[0], pos[1] = new_pos
-                    # Remove positions that are outside the field
-                    self.opppnent_possible_positions = {k: [pos for pos in v if pos in self.field]
-                                                        for k, v in self.opppnent_possible_positions.items()}
+        json_data = json.loads(json_str)
+        if "result" in json_data:
+            result = json_data["result"]
+            if "attacked" in result:
+                attacked_pos = result["attacked"]["position"]
+                around_attacked = [(x, y) for x in range(attacked_pos[0] - 1, attacked_pos[0] + 2)
+                                for y in range(attacked_pos[1] - 1, attacked_pos[1] + 2)
+                                if (x, y) in self.field]
+                self.opppnent_possible_positions = {k: [pos.copy() for pos in v if pos in around_attacked]
+                                                    for k, v in self.opppnent_possible_positions.items()}
+            elif "moved" in result:
+                num_arrows = result["moved"]["distance"]
+                self.opppnent_possible_positions = {k: [pos.copy() for pos in v] for k, v in self.opppnent_possible_positions.items()}
+                for k, v in self.opppnent_possible_positions.items():
+                    for pos in v:
+                        new_pos = (pos[0] + num_arrows[0], pos[1] + num_arrows[1])
+                        if new_pos in self.field:
+                            pos[0], pos[1] = new_pos
+                self.opppnent_possible_positions = {k: [pos for pos in v if pos in self.field]
+                                                    for k, v in self.opppnent_possible_positions.items()}
+
     def action(self):
         act = random.choice(["move", "attack"])
 
