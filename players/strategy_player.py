@@ -66,18 +66,18 @@ class StrategicPlayer(Player):
                 self.opppnent_possible_positions = {k: [pos for pos in v if pos in around_attacked]
                                                     for k, v in self.opppnent_possible_positions.items()}
             elif "moved" in result:
+                ship_type = result["moved"]["ship"]
                 num_arrows = result["moved"]["distance"]
-                # Update possible positions based on the direction and number of arrows
-                for k, v in self.opppnent_possible_positions.items():
-                    for pos in v:
-                        new_pos = (pos[0] + num_arrows[0], pos[1] + num_arrows[1])
-                        if new_pos in self.field:
-                            pos[0], pos[1] = new_pos
+                # Update possible positions only for the specific ship that moved
+                possible_positions = self.opppnent_possible_positions.get(ship_type, [])
+                for pos in possible_positions:
+                    new_pos = (pos[0] + num_arrows[0], pos[1] + num_arrows[1])
+                    if new_pos in self.field:
+                        pos[0], pos[1] = new_pos
                 # Remove positions that are outside the field
-                self.opppnent_possible_positions = {k: [pos for pos in v if pos in self.field]
-                                                    for k, v in self.opppnent_possible_positions.items()}
-
-    def action(self):
+                self.opppnent_possible_positions[ship_type] = [pos for pos in possible_positions if pos in self.field]
+    
+   def action(self):
         act = random.choice(["move", "attack"])
         if act == "move":
             ship = random.choice(list(self.ships.values()))
