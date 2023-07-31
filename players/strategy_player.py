@@ -15,10 +15,10 @@ class StrategicPlayer(Player):
 
     def __init__(self, seed=0):
         self.random_generator = random.Random(seed)
-        super().__init__(self.initialize_positions())
         # Initialize the field as a 2x2 grid
         self.field = [[i, j] for i in range(Player.FIELD_SIZE)
                       for j in range(Player.FIELD_SIZE)]
+        super().__init__(self.initialize_positions())
 
     def initialize_positions(self):
         # Randomly select three positions for the ships with better validation
