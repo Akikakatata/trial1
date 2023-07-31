@@ -64,14 +64,13 @@ class StrategicPlayer(Player):
                 if "hit" in result["attacked"] and "near" not in result:
                     self.player_HP -= 1
             elif "moved" in result:
-                num_arrows = result["moved"]["distance"]
+                movement = result["moved"]["distance"]
                 # Update possible positions based on the direction and number of arrows
                 for pos in self.opponent_possible_positions.copy():  # Create a copy before iterating
-                    for i in range(1, num_arrows + 1):
-                        x, y = pos
-                        new_pos = (x + movement[0], y + movement[1])
-                        if new_pos in self.field and new_pos not in self.opponent_possible_positions:
-                            self.opponent_possible_positions.append(new_pos)
+                    x, y = pos
+                    new_pos = (x + movement[0], y + movement[1])
+                    if new_pos in self.field and new_pos not in self.opponent_possible_positions:
+                        self.opponent_possible_positions.append(new_pos)
     def update_after_action(self, json_str):
         json_data = json.loads(json_str)
         if "result" in json_data:
@@ -101,21 +100,14 @@ class StrategicPlayer(Player):
             ship = random.choice(list(self.ships.values()))
             while True:
                 to = random.choice(self.field)
-                while not ship.can_reach(to) or not self.overlap(to) is None:
-                    to = random.choice(self.field)
-                validation = "fit"
-                for i in range(len(self.positions)):
-                    for j in range(i + 1, len(self.positions)):
-                        pos1 = list(to)
-                        pos2 = self.positions[list(self.positions.keys())[j]]
-                        x1, y1 = pos1
-                        x2, y2 = pos2
-                        if ((x1 == x2) or (y1 == y2)) or (abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1):
-                            validation = "unfit"
-                            break
-                    if validation == "unfit":
-                        break
-                if validation == "fit":
+                # Check if the generated position is not adjacent to any other ship's position
+                adjacent_to_ship = any(ship.position[0] - 1 <= to[0] <= ship.position[0] + 1 and
+                                    ship.position[1] - 1 <= to[1] <= ship.position[1] + 1
+                                    for ship in self.ships.values())
+                if not ship.can_reach(to) or not self.overlap(to) is None or adjacent_to_ship:
+                    # If the position is invalid, generate a new one
+                    continue
+                else:
                     return json.dumps(self.move(ship.type, to))
         elif act == "attack":
             if self.opponent_possible_positions:
