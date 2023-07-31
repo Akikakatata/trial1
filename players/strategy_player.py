@@ -74,6 +74,13 @@ class StrategicPlayer(Player):
 
     def update_after_action(self, json_str):
         json_data = json.loads(json_str)
+        print("Received JSON Data in update_after_action:")
+        print(json_str)
+        try:
+            json_data = json.loads(json_str)
+        except Exception as e:
+            print("Error parsing JSON data:", e)
+        return
         if "result" in json_data:
             result = json_data["result"]
             if "attacked" in result:
