@@ -45,7 +45,8 @@ class Player:
     def __init__(self, positions):
         self.ships = {ship_type: PlayerShip(ship_type, position)
                       for ship_type, position in positions.items()}
-
+    def total_hp(self):
+        return sum(ship.hp for ship in self.ships.values())
     # 初期状態をJSONで返す．
     def initial_condition(self):
         cond = {ship.type: ship.position for ship in self.ships.values()}

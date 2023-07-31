@@ -68,8 +68,10 @@ class StrategicPlayer(Player):
                             self.opponent_possible_positions.append(new_pos)
 
     def action(self):
-        total_player_HP = sum(ship["hp"] for ship in self.ships.values())
-        total_opponent_HP = sum(ship["hp"] for ship in self.opponent_ships.values())
+
+        total_player_HP = sum(ship.info["hp"] for ship in self.ships.values())
+        total_opponent_HP = sum(ship.info["hp"] for ship in self.opponent_ships.values())
+
 
         if total_opponent_HP< total_player_HP:
             act = random.choices(["move", "attack"], [2, 5], k=1)[0]
