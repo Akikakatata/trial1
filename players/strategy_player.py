@@ -4,7 +4,6 @@ import random
 import socket
 import sys
 import logging
-import time 
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("StrategicPlayer")
@@ -14,11 +13,7 @@ from lib.player_base import Player, PlayerShip
 
 class StrategicPlayer(Player):
 
-    def __init__(self, seed=None):
-        if seed is None:
-            # Generate a random seed based on current time
-            seed = int(time.time())
-
+    def __init__(self, seed=0):
         random.seed(seed)
 
         # Initialize the field as a 2x2 grid
@@ -47,11 +42,10 @@ class StrategicPlayer(Player):
                     break
 
             if validation == "fit":
-                # Assign the ship positions directly to self.ships instead of calling Player's __init__
-                self.ships = {type: PlayerShip(type, pos) for type, pos in self.positions.items()}
+                super().__init__(self.positions)
                 break
 
-        self.opponent_possible_positions = []
+        self.opponent_possible_positions =  []
         self.opnnent_certain_positions = []
         self.opponent_HP = 6
         self.player_HP = 6
@@ -70,14 +64,14 @@ class StrategicPlayer(Player):
                 print(around_attacked)
                 # Add the 8 cells around the attacked position to possible opponent position list 
                 for new_pos in around_attacked:
-                    if new_pos not in self.opponent_possible_positions:
+                    if new_pos not in self.opponent_possible_positions and new_pos in self.field:
                         self.opponent_possible_positions.append(new_pos)
                 if "hit" in result["attacked"] and "near" not in result:
                     self.player_HP -= 1
             elif "moved" in result:
                 movement = result["moved"]["distance"]
                 # Calculate new positions for each individual position in the opponent_possible_positions list
-                for pos in self.opponent_possible_positions:
+                for pos in self.opponent_possible_positions.copy():
                     x, y = pos
                     new_pos = (x + movement[0], y + movement[1])
                     if new_pos in self.field and new_pos not in self.opponent_possible_positions:
