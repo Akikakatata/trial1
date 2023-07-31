@@ -106,12 +106,20 @@ class StrategicPlayer(Player):
         print(f"Opponent's Possible Positions:")
         print(self.opponent_possible_positions)
 
+
         if act == "move":
             ship = random.choice(list(self.ships.values()))
-            to = random.choice(self.field)
-            while not ship.can_reach(to) or not self.overlap(to) is None:
+            while True:
                 to = random.choice(self.field)
-            return json.dumps(self.move(ship.type, to)) 
+                # Check if the generated position is not adjacent to any other ship's position
+                adjacent_to_ship = any(ship.position[0] - 1 <= to[0] <= ship.position[0] + 1 and
+                                    ship.position[1] - 1 <= to[1] <= ship.position[1] + 1
+                                    for ship in self.ships.values())
+                if not ship.can_reach(to) or not self.overlap(to) is None or adjacent_to_ship:
+                    # If the position is invalid, generate a new one
+                    continue
+                else:
+                    return json.dumps(self.move(ship.type, to))
         elif act == "attack":
             if self.opponent_possible_positions:
                 to = random.choice(self.opponent_possible_positions)
