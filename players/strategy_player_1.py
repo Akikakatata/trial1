@@ -14,7 +14,6 @@ from lib.player_base import Player, PlayerShip
 class StrategicPlayer(Player):
 
     def __init__(self, seed=0):
-        random.seed(seed)
 
         # Initialize the field as a 2x2 grid
         self.field = [[i, j] for i in range(Player.FIELD_SIZE)
