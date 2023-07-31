@@ -137,18 +137,21 @@ def main(host, port, seed=0):
             get_msg = sockfile.readline()
             logger.debug(get_msg)
             player = StrategicPlayer(seed=seed)
-            sockfile.write(player.initial_condition()+'\n')
+            sockfile.write(player.initial_condition() + '\n')
+            sockfile.flush()
 
             while True:
                 info = sockfile.readline().rstrip()
                 logger.debug(info)
                 if info == "your turn":
-                    sockfile.write(player.action()+'\n')
+                    sockfile.write(player.action() + '\n')
+                    sockfile.flush()
                     get_msg = sockfile.readline()
                     player.update_after_action(get_msg)
                 elif info == "waiting":
                     get_msg = sockfile.readline()
-                    player.update_self_opponent_possible_positions(get_msg)
+                    if get_msg.strip():
+                        player.update_self_opponent_possible_positions(get_msg)
                 elif info == "you win":
                     logger.info("You win!")
                     break
