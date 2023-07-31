@@ -18,6 +18,9 @@ class StrategicPlayer(Player):
         # Initialize the field as a 2x2 grid
         self.field = [[i, j] for i in range(Player.FIELD_SIZE)
                       for j in range(Player.FIELD_SIZE)]
+        self.opponent_possible_positions = []
+        self.opponent_HP = 6
+        self.player_HP = 6
         super().__init__(self.initialize_positions())
 
     def initialize_positions(self):
