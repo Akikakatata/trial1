@@ -76,8 +76,8 @@ class StrategicPlayer(Player):
 
     def action(self):
 
-        total_player_HP = sum(ship.info["hp"] for ship in self.ships.values())
-        total_opponent_HP = sum(ship.hp for ship in self.ships.values())
+        total_player_HP = sum(ship.hp for ship in self.ships.values())
+        total_opponent_HP = self.opponent_HP
 
 
         if total_opponent_HP< total_player_HP:
