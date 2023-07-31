@@ -113,26 +113,32 @@ class StrategicPlayer(Player):
 
             if act == "move":
                 ship = random.choice(list(self.ships.values()))
-                to = random.choice(self.field)
-                while not ship.can_reach(to) or not self.overlap(to) is None:
-                    to = random.choice(self.field)
-                return json.dumps(self.move(ship.type, to))
-            elif act == "attack":
+                possible_moves = [pos for pos in self.field if ship.can_reach(pos) and self.overlap(pos) is None]
+                if possible_moves:
+                    to = random.choice(possible_moves)
+                    return json.dumps(self.move(ship.type, to))
+                else:
+                    # If there are no valid moves, the ship can only attack
+                    act = "attack"
+
+            if act == "attack":
                 if self.opponent_possible_positions:
-                    to = random.choice(self.opponent_possible_positions)
-                    while not self.can_attack(to):
-                        to = random.choice(self.opponent_possible_positions)
-                    return json.dumps(self.attack(to))
+                    possible_attacks = [pos for pos in self.opponent_possible_positions if self.can_attack(pos)]
+                    if possible_attacks:
+                        to = random.choice(possible_attacks)
+                    else:
+                        # Choose a random cell in the field since no valid attack positions are available
+                        to = random.choice(self.field)
                 else:
                     # Choose a random cell in the field since no opponent's positions are available
                     to = random.choice(self.field)
-                    while not self.can_attack(to):
-                        to = random.choice(self.field)
-                    return json.dumps(self.attack(to))
+                
+                return json.dumps(self.attack(to))
 
         else:
             # If the opponent's move result is not yet received, wait and do nothing for this turn
             return json.dumps({"type": "wait"})
+
 
 
 def main(host, port, seed=0):
@@ -155,7 +161,7 @@ def main(host, port, seed=0):
                 info = sockfile.readline().rstrip()
                 logger.debug(info)
                 if info == "your turn":
-                    sockfile.write(player.action()+'\n')
+                    sockfile.write(player.action()+'\n')s
                     get_msg = sockfile.readline()
                     player.update_after_action(get_msg)
                 elif info == "waiting":
