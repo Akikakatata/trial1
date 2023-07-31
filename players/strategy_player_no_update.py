@@ -51,25 +51,36 @@ class StrategicPlayer(Player):
         self.opponent_HP = 6
         self.player_HP = 6
         
-    def update_after_action(self, json_str):
-        print("Received JSON Data in update_after_action:")
+
+dfsd
+    def update_self_opponent_possible_positions(self, json_str):
+        print("Received JSON Data in update_self_opponent_possible_positions:")
         print(json_str)
-        json_data = json.loads(json_str)
+        json_data = json.loads(json_str) 
         if "result" in json_data:
             result = json_data["result"]
             if "attacked" in result:
                 attacked_pos = result["attacked"]["position"]
-                x, y = attacked_pos 
-                if "hit" in result["attacked"]:
-                    self.opponent_HP -= 1
-                elif "near" in result["attacked"]:
-                    around_attacked = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
-                    print(around_attacked)
-                    for new_pos in around_attacked:
-                        if new_pos not in self.opponent_possible_positions:
-                            self.opponent_possible_positions.append(new_pos)
+                x, y = attacked_pos
+                # Calculate the 8 cells around the attacked position
+                around_attacked = [(x-1, y-1), (x-1, y), (x-1, y+1), (x, y-1), (x, y+1), (x+1, y-1), (x+1, y), (x+1, y+1)]
+                print(around_attacked)
+                # Add the 8 cells around the attacked position to possible opponent position list 
+                for new_pos in around_attacked:
+                    if new_pos not in self.opponent_possible_positions:
+                        self.opponent_possible_positions.append(new_pos)
+                if "hit" in result["attacked"] and "near" not in result:
+                    self.player_HP -= 1
+            elif "moved" in result:
+                movement = result["moved"]["distance"]
+                # Calculate new positions for each individual position in the opponent_possible_positions list
+                for pos in self.opponent_possible_positions:
+                    x, y = pos
+                    new_pos = (x + movement[0], y + movement[1])
+                    if new_pos in self.field and new_pos not in self.opponent_possible_positions:
+                        self.opponent_possible_positions.append(new_pos)
             # Calculate total opponent's HP from their ship information
-            if "condition" in json_data and "enemy" in json_data["condition"]:
+            elif "condition" in json_data and "enemy" in json_data["condition"]:
                 enemy_info = json_data["condition"]["enemy"]
                 self.opponent_HP = sum([ship_info["hp"] for ship_info in enemy_info.values()])
 
