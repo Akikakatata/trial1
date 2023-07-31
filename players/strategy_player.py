@@ -155,7 +155,7 @@ def main(host, port, seed=0):
                 info = sockfile.readline().rstrip()
                 logger.debug(info)
                 if info == "your turn":
-                    sockfile.write(player.action()+'\n')s
+                    sockfile.write(player.action()+'\n')
                     get_msg = sockfile.readline()
                     player.update_after_action(get_msg)
                 elif info == "waiting":
