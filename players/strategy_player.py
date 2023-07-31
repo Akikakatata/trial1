@@ -14,21 +14,21 @@ from lib.player_base import Player, PlayerShip
 class StrategicPlayer(Player):
 
     def __init__(self, seed=0):
-        super().__init__()
         self.random_generator = random.Random(seed)
+        super().__init__(self.initialize_positions())
 
     def initialize_positions(self):
         # Randomly select three positions for the ships with better validation
         while True:
             ps = self.random_generator.sample(self.field, 3)
-            self.positions = {'w': ps[0], 'c': ps[1], 's': ps[2]}
+            positions = {'w': ps[0], 'c': ps[1], 's': ps[2]}
 
             # Validate that the ships are not in the same row, column, or diagonally adjacent
             validation = "fit"
-            for i in range(len(self.positions)):
-                for j in range(i + 1, len(self.positions)):
-                    pos1 = self.positions[list(self.positions.keys())[i]]
-                    pos2 = self.positions[list(self.positions.keys())[j]]
+            for i in range(len(positions)):
+                for j in range(i + 1, len(positions)):
+                    pos1 = positions[list(positions.keys())[i]]
+                    pos2 = positions[list(positions.keys())[j]]
                     x1, y1 = pos1
                     x2, y2 = pos2
 
@@ -40,7 +40,7 @@ class StrategicPlayer(Player):
                     break
 
             if validation == "fit":
-                break
+                return positions
 
     def update_self_opponent_possible_positions(self, json_str):
         json_data = json.loads(json_str)
