@@ -127,16 +127,17 @@ class StrategicPlayer(Player):
             if any(self.opponent_possible_positions.values()):  # Check if there are any non-empty lists
                 ship_type = random.choice(list(self.opponent_possible_positions.keys()))
                 possible_positions = self.opponent_possible_positions.get(ship_type, [])
-                while not self.can_attack(possible_positions):
-                    possible_positions = self.opponent_possible_positions.get(ship_type, [])
-                to = random.choice(possible_positions)
-                return json.dumps(self.attack(to))
+                if possible_positions:
+                    # Choose a single position from the list of possible positions
+                    to = random.choice(possible_positions)
+                    return json.dumps(self.attack(to))
             else:
                 # Choose a random cell in the field since no opponent's positions are available
                 to = random.choice(self.field)
                 while not self.can_attack(to):
                     to = random.choice(self.field)
                 return json.dumps(self.attack(to))
+
 
 
 def main(host, port, seed=0):
