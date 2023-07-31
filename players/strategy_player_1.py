@@ -45,55 +45,46 @@ class StrategicPlayer(Player):
                 super().__init__(self.positions)
                 break
 
-        self.opponent_possible_positions =  []
+        self.opponent_possible_positions = []
         self.opponent_HP = 6
         self.player_HP = 6
 
 
     def update_self_opponent_possible_positions(self, json_str):
-        print("Received JSON Data in update_self_opponent_possible_positions:")
-        print(json_str)
-        json_data = json.loads(json_str) 
-        if "result" in json_data:
-            result = json_data["result"]
-            if "attacked" in result:
-                attacked_pos = result["attacked"]["position"]
-                x, y = attacked_pos
-                # Calculate the 8 cells around the attacked position
-                around_attacked = [(x-1, y-1), (x-1, y), (x-1, y+1), (x, y-1), (x, y+1), (x+1, y-1), (x+1, y), (x+1, y+1)]
-                print(around_attacked)
-                # Add the 8 cells around the attacked position to possible opponent position list 
-                for new_pos in around_attacked:
-                    if new_pos not in self.opponent_possible_positions:
-                        self.opponent_possible_positions.append(new_pos)
-                if "hit" in result["attacked"] and "near" not in result:
-                    self.player_HP -= 1
-            elif "moved" in result:
-                movement = result["moved"]["distance"]
-                # Calculate new positions for each individual position in the opponent_possible_positions list
-                for pos in self.opponent_possible_positions:
-                    x, y = pos
-                    new_pos = (x + movement[0], y + movement[1])
-                    if new_pos in self.field and new_pos not in self.opponent_possible_positions:
-                        self.opponent_possible_positions.append(new_pos)
-
-    def update_after_action(self, json_str):
-        print("Received JSON Data in update_after_action:")
-        print(json_str)
         json_data = json.loads(json_str)
         if "result" in json_data:
             result = json_data["result"]
             if "attacked" in result:
                 attacked_pos = result["attacked"]["position"]
-                x, y = attacked_pos 
+                # Calculate the 9 cells around the attacked position
+                x, y = attacked_pos
+                around_attacked = [(x-1, y-1), (x-1, y), (x-1, y+1), (x, y-1), (x, y+1), (x+1, y-1), (x+1, y), (x+1, y+1)]                # Add the 9 cells around the attacked position to possible opponent position list 
+                for new_pos in around_attacked:
+                    self.opponent_possible_positions.append(new_pos)   
+                if "hit" in result["attacked"] and "near" not in result:
+                    self.player_HP -= 1
+            elif "moved" in result:
+                num_arrows = result["moved"]["distance"]
+                # Update possible positions based on the direction and number of arrows
+                for pos in self.opponent_possible_positions.copy():  # Create a copy before iterating
+                    for i in range(1, num_arrows + 1):
+                        x, y = pos
+                        new_pos = (x + movement[0], y + movement[1])
+                        if new_pos in self.field and new_pos not in self.opponent_possible_positions:
+                            self.opponent_possible_positions.append(new_pos)
+    def update_after_action(self, json_str):
+        json_data = json.loads(json_str)
+        if "result" in json_data:
+            result = json_data["result"]
+            if "attacked" in result:
+                attacked_pos = result["attacked"]["position"]
+                x, y = attacked_pos
                 if "hit" in result["attacked"]:
                     self.opponent_HP -= 1
                 elif "near" in result["attacked"]:
                     around_attacked = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
-                    print(around_attacked)
                     for new_pos in around_attacked:
-                        if new_pos not in self.opponent_possible_positions:
-                            self.opponent_possible_positions.append(new_pos)
+                        self.opponent_possible_positions.append(new_pos)
 
     def action(self):
         if self.opponent_HP < self.player_HP:
@@ -108,10 +99,24 @@ class StrategicPlayer(Player):
 
         if act == "move":
             ship = random.choice(list(self.ships.values()))
-            to = random.choice(self.field)
-            while not ship.can_reach(to) or not self.overlap(to) is None:
+            while True:
                 to = random.choice(self.field)
-            return json.dumps(self.move(ship.type, to)) 
+                while not ship.can_reach(to) or not self.overlap(to) is None:
+                    to = random.choice(self.field)
+                validation = "fit"
+                for i in range(len(self.positions)):
+                    for j in range(i + 1, len(self.positions)):
+                        pos1 = list(to)
+                        pos2 = self.positions[list(self.positions.keys())[j]]
+                        x1, y1 = pos1
+                        x2, y2 = pos2
+                        if ((x1 == x2) or (y1 == y2)) or (abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1):
+                            validation = "unfit"
+                            break
+                    if validation == "unfit":
+                        break
+                if validation == "fit":
+                    return json.dumps(self.move(ship.type, to))
         elif act == "attack":
             if self.opponent_possible_positions:
                 to = random.choice(self.opponent_possible_positions)

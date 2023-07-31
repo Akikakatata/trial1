@@ -86,6 +86,7 @@ class StrategicPlayer(Player):
                             new_pos = (pos[0] + i * num_arrows[0], pos[1] + i * num_arrows[1])
                             if new_pos in self.field:
                                 self.opponent_possible_positions[ship_type].append(new_pos)
+    
     def update_after_action(self, json_str):
         print("Received JSON Data in update_after_action:")
         print(json_str)
