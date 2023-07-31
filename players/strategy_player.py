@@ -14,14 +14,13 @@ from lib.player_base import Player, PlayerShip
 class StrategicPlayer(Player):
 
     def __init__(self, seed=0):
+        super().__init__()
+        self.random_generator = random.Random(seed)
 
-        # Initialize the field as a 2x2 grid
-        self.field = [[i, j] for i in range(Player.FIELD_SIZE)
-                      for j in range(Player.FIELD_SIZE)]
-
+    def initialize_positions(self):
+        # Randomly select three positions for the ships with better validation
         while True:
-            # Randomly select three positions for the ships
-            ps = random.sample(self.field, 3)
+            ps = self.random_generator.sample(self.field, 3)
             self.positions = {'w': ps[0], 'c': ps[1], 's': ps[2]}
 
             # Validate that the ships are not in the same row, column, or diagonally adjacent
@@ -41,18 +40,10 @@ class StrategicPlayer(Player):
                     break
 
             if validation == "fit":
-                super().__init__(self.positions)
                 break
 
-        self.opponent_possible_positions =  []
-        self.opponent_HP = 6
-        self.player_HP = 6
-
-
     def update_self_opponent_possible_positions(self, json_str):
-        print("Received JSON Data in update_self_opponent_possible_positions:")
-        print(json_str)
-        json_data = json.loads(json_str) 
+        json_data = json.loads(json_str)
         if "result" in json_data:
             result = json_data["result"]
             if "attacked" in result:
@@ -60,8 +51,7 @@ class StrategicPlayer(Player):
                 x, y = attacked_pos
                 # Calculate the 8 cells around the attacked position
                 around_attacked = [(x-1, y-1), (x-1, y), (x-1, y+1), (x, y-1), (x, y+1), (x+1, y-1), (x+1, y), (x+1, y+1)]
-                print(around_attacked)
-                # Add the 8 cells around the attacked position to possible opponent position list 
+                # Add the 8 cells around the attacked position to possible opponent position list
                 for new_pos in around_attacked:
                     if new_pos not in self.opponent_possible_positions:
                         self.opponent_possible_positions.append(new_pos)
@@ -77,53 +67,54 @@ class StrategicPlayer(Player):
                         self.opponent_possible_positions.append(new_pos)
 
     def update_after_action(self, json_str):
-        print("Received JSON Data in update_after_action:")
-        print(json_str)
         json_data = json.loads(json_str)
         if "result" in json_data:
             result = json_data["result"]
             if "attacked" in result:
                 attacked_pos = result["attacked"]["position"]
-                x, y = attacked_pos 
+                x, y = attacked_pos
                 if "hit" in result["attacked"]:
                     self.opponent_HP -= 1
                 elif "near" in result["attacked"]:
-                    around_attacked = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
-                    print(around_attacked)
+                    around_attacked = [(x-1, y-1), (x-1, y), (x-1, y+1), (x, y-1), (x, y+1), (x+1, y-1), (x+1, y), (x+1, y+1)]
                     for new_pos in around_attacked:
                         if new_pos not in self.opponent_possible_positions:
                             self.opponent_possible_positions.append(new_pos)
 
     def action(self):
         if self.opponent_HP < self.player_HP:
-            act = random.choices(["move", "attack"], [2, 5], k=1)[0]
+            act = self.random_generator.choices(["move", "attack"], [2, 5], k=1)[0]
         elif self.opponent_HP > self.player_HP:
-            act = random.choices(["move", "attack"], [5, 2], k=1)[0]
+            act = self.random_generator.choices(["move", "attack"], [5, 2], k=1)[0]
         else:
-            act = random.choice(["move", "attack"])
-
-        print(f"Opponent's Possible Positions:")
-        print(self.opponent_possible_positions)
+            act = self.random_generator.choice(["move", "attack"])
 
         if act == "move":
-            ship = random.choice(list(self.ships.values()))
-            to = random.choice(self.field)
-            while not ship.can_reach(to) or not self.overlap(to) is None:
-                to = random.choice(self.field)
-            return json.dumps(self.move(ship.type, to)) 
-        elif act == "attack":
-            if self.opponent_possible_positions:
-                to = random.choice(self.opponent_possible_positions)
-                while not self.can_attack(to):
-                    to = random.choice(self.opponent_possible_positions)
-                return json.dumps(self.attack(to))
+            ship = self.random_generator.choice(list(self.ships.values()))
+            valid_moves = []
+            for pos in self.field:
+                if ship.can_reach(pos) and self.overlap(pos) is None:
+                    valid_moves.append(pos)
+            if valid_moves:
+                to = self.random_generator.choice(valid_moves)
+                return json.dumps(self.move(ship.type, to))
             else:
-                # Choose a random cell in the field since no opponent's positions are available
-                to = random.choice(self.field)
-                while not self.can_attack(to):
-                    to = random.choice(self.field)
-                return json.dumps(self.attack(to))
-            
+                # No valid move, try attacking instead
+                act = "attack"
+
+        if act == "attack":
+            if self.opponent_possible_positions:
+                valid_attacks = [pos for pos in self.opponent_possible_positions if self.can_attack(pos)]
+                if valid_attacks:
+                    to = self.random_generator.choice(valid_attacks)
+                else:
+                    # No valid attack, just choose randomly
+                    to = self.random_generator.choice(self.opponent_possible_positions)
+            else:
+                # No opponent's positions available, choose randomly
+                to = self.random_generator.choice(self.field)
+
+            return json.dumps(self.attack(to))
 
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
@@ -139,6 +130,7 @@ def main(host, port, seed=0):
             get_msg = sockfile.readline()
             logger.debug(get_msg)
             player = StrategicPlayer(seed=seed)
+            player.initialize_positions()
             sockfile.write(player.initial_condition()+'\n')
 
             while True:
