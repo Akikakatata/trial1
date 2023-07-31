@@ -48,6 +48,8 @@ class StrategicPlayer(Player):
                 break
 
         self.opponent_possible_positions =  []
+        self.opponent_HP = 6
+        self.player_HP = 6
         
     def update_after_action(self, json_str):
         print("Received JSON Data in update_after_action:")
@@ -66,11 +68,16 @@ class StrategicPlayer(Player):
                     for new_pos in around_attacked:
                         if new_pos not in self.opponent_possible_positions:
                             self.opponent_possible_positions.append(new_pos)
+            # Calculate total opponent's HP from their ship information
+            if "condition" in json_data and "enemy" in json_data["condition"]:
+                enemy_info = json_data["condition"]["enemy"]
+                self.opponent_HP = sum([ship_info["hp"] for ship_info in enemy_info.values()])
+
 
     def action(self):
 
         total_player_HP = sum(ship.info["hp"] for ship in self.ships.values())
-        total_opponent_HP = sum(ship.info["hp"] for ship in self.opponent_ships.values())
+        total_opponent_HP = sum(ship.hp for ship in self.ships.values())
 
 
         if total_opponent_HP< total_player_HP:
