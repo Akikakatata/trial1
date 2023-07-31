@@ -98,48 +98,35 @@ class StrategicPlayer(Player):
                             self.opponent_possible_positions.append(new_pos)
 
     def action(self):
-        # Check if the opponent has made a move and update the possible opponent positions
-        if self.opponent_possible_positions:
-            # If the opponent has possible positions, consider those while deciding the player's move
-            if self.opponent_HP < self.player_HP:
-                act = random.choices(["move", "attack"], [2, 5], k=1)[0]
-            elif self.opponent_HP > self.player_HP:
-                act = random.choices(["move", "attack"], [5, 2], k=1)[0]
-            else:
-                act = random.choice(["move", "attack"])
-
-            print(f"Opponent's Possible Positions:")
-            print(self.opponent_possible_positions)
-
-            if act == "move":
-                ship = random.choice(list(self.ships.values()))
-                possible_moves = [pos for pos in self.field if ship.can_reach(pos) and self.overlap(pos) is None]
-                if possible_moves:
-                    to = random.choice(possible_moves)
-                    return json.dumps(self.move(ship.type, to))
-                else:
-                    # If there are no valid moves, the ship can only attack
-                    act = "attack"
-
-            if act == "attack":
-                if self.opponent_possible_positions:
-                    possible_attacks = [pos for pos in self.opponent_possible_positions if self.can_attack(pos)]
-                    if possible_attacks:
-                        to = random.choice(possible_attacks)
-                    else:
-                        # Choose a random cell in the field since no valid attack positions are available
-                        to = random.choice(self.field)
-                else:
-                    # Choose a random cell in the field since no opponent's positions are available
-                    to = random.choice(self.field)
-                
-                return json.dumps(self.attack(to))
-
+        if self.opponent_HP < self.player_HP:
+            act = random.choices(["move", "attack"], [2, 5], k=1)[0]
+        elif self.opponent_HP > self.player_HP:
+            act = random.choices(["move", "attack"], [5, 2], k=1)[0]
         else:
-            # If the opponent's move result is not yet received, wait and do nothing for this turn
-            return json.dumps({"type": "wait"})
+            act = random.choice(["move", "attack"])
 
+        print(f"Opponent's Possible Positions:")
+        print(self.opponent_possible_positions)
 
+        if act == "move":
+            ship = random.choice(list(self.ships.values()))
+            to = random.choice(self.field)
+            while not ship.can_reach(to) or not self.overlap(to) is None:
+                to = random.choice(self.field)
+            return json.dumps(self.move(ship.type, to)) 
+        elif act == "attack":
+            if self.opponent_possible_positions:
+                to = random.choice(self.opponent_possible_positions)
+                while not self.can_attack(to):
+                    to = random.choice(self.opponent_possible_positions)
+                return json.dumps(self.attack(to))
+            else:
+                # Choose a random cell in the field since no opponent's positions are available
+                to = random.choice(self.field)
+                while not self.can_attack(to):
+                    to = random.choice(self.field)
+                return json.dumps(self.attack(to))
+            
 
 def main(host, port, seed=0):
     assert isinstance(host, str) and isinstance(port, int)
@@ -213,10 +200,3 @@ if __name__ == '__main__':
         sys.exit(1)
 
     main(args.host, args.port, seed=args.seed)
-
-
-
-
-
-
-
