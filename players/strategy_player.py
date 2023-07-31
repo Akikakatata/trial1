@@ -50,6 +50,7 @@ class StrategicPlayer(Player):
         self.opponent_HP = 6
         self.player_HP = 6
 
+
     def update_self_opponent_possible_positions(self, json_str):
         print("Received JSON Data in update_self_opponent_possible_positions:")
         print(json_str)
