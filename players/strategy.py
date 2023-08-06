@@ -202,16 +202,10 @@ class StraPlayer(Player):
         if act == "move":
             ship = random.choice(list(self.ships.values()))
             to = random.choice(self.field)
-            while not ship.can_reach(to) or self.is_adjacent_to_other_ship(to):
+            while not ship.can_reach(to) or not self.overlap(to) is None:
                 to = random.choice(self.field)
-            return json.dumps(self.move(ship.type, to))
 
-    def is_adjacent_to_other_ship(self, position):
-        for ship_position in self.positions.values():
-            x, y = position
-            x_ship, y_ship = ship_position
-            if ((x != x_ship) or (y != y_ship)) or (abs(x - x_ship) > 1 and abs(y - y_ship) > 1):
-                return True
+            return json.dumps(self.move(ship.type, to))
 
 
 def main(host, port, seed=0):
