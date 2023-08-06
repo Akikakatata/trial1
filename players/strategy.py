@@ -115,7 +115,7 @@ class StraPlayer(Player):
                 else: 
                     s_hp = 0
                 self.opponent_HP = w_hp + c_hp + s_hp
-                 
+
     def update_my_attack(self, json_str):
         print("Received JSON Data in update_my_attack:")
         print(json_str)
@@ -143,22 +143,13 @@ class StraPlayer(Player):
                 if "hit" in result["attacked"]: 
                     attacked_pos = result["attacked"]["position"]
                     if "w" in result["attacked"]["hit"]:
-                        self.oppo_poss_posi_w = []
-                        self.oppo_poss_posi_w.append(attacked_pos)
+                        self.oppo_poss_posi_w = [attacked_pos]
                     if "c" in result["attacked"]["hit"]:
-                        self.oppo_poss_posi_c = []
-                        self.oppo_poss_posi_c.append(attacked_pos)
+                        self.oppo_poss_posi_c = [attacked_pos]
                     if "s" in result["attacked"]["hit"]:
-                        self.oppo_poss_posi_s = []
-                        self.oppo_poss_posi_s.append(attacked_pos)
-                if "hit" or "near" not in result["attacked"]: 
-                    if attacked_pos in self.oppo_poss_posi_w:
-                        self.oppo_poss_posi_w.remove(attacked_pos)
-                    if attacked_pos in self.oppo_poss_posi_c:
-                        self.oppo_poss_posi_c.remove(attacked_pos)
-                    if attacked_pos in self.oppo_poss_posi_s:
-                        self.oppo_poss_posi_s.remove(attacked_pos)
-            else: 
+                        self.oppo_poss_posi_s = [attacked_pos]
+
+            else:
                 pass
 
         if "condition" in json_data:
@@ -242,7 +233,7 @@ class StraPlayer(Player):
         if act == "move":
             ship = random.choice(list(self.ships.values()))
             to = random.choice(self.field)
-            while not ship.can_reach(to) or not self.overlap(to) is None:
+            while not ship.can_reach(to) or self.overlap(to) is None:
                 to = random.choice(self.field)
 
             return json.dumps(self.move(ship.type, to))
