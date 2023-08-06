@@ -86,11 +86,15 @@ class StraPlayer(Player):
             condition_data = json_data["condition"]
             if "me" in condition_data:
                 me_data = condition_data["me"]
-                self.my_HP = me_data["w"]["hp"] + me_data["c"]["hp"] + me_data["s"]["hp"]
+                self.my_HP = (me_data["w"].get("hp", 0) +
+                            me_data["c"].get("hp", 0) +
+                            me_data.get("s", {}).get("hp", 0))
             if "enemy" in condition_data:
                 enemy_data = condition_data["enemy"]
-                self.opponent_HP = enemy_data["w"]["hp"] + enemy_data["c"]["hp"] + enemy_data["s"]["hp"]        
-
+                self.opponent_HP = (enemy_data["w"].get("hp", 0) +
+                                    enemy_data["c"].get("hp", 0) +
+                                    enemy_data.get("s", {}).get("hp", 0))
+    
     def update_my_attack(self, json_str):
         print("Received JSON Data in update_my_attack:")
         print(json_str)
@@ -140,10 +144,15 @@ class StraPlayer(Player):
             condition_data = json_data["condition"]
             if "me" in condition_data:
                 me_data = condition_data["me"]
-                self.my_HP = me_data["w"]["hp"] + me_data["c"]["hp"] + me_data["s"]["hp"]
+                self.my_HP = (me_data["w"].get("hp", 0) +
+                            me_data["c"].get("hp", 0) +
+                            me_data.get("s", {}).get("hp", 0))
             if "enemy" in condition_data:
                 enemy_data = condition_data["enemy"]
-                self.opponent_HP = enemy_data["w"]["hp"] + enemy_data["c"]["hp"] + enemy_data["s"]["hp"]        
+                self.opponent_HP = (enemy_data["w"].get("hp", 0) +
+                                    enemy_data["c"].get("hp", 0) +
+                                    enemy_data.get("s", {}).get("hp", 0))
+    
     
     def action(self):
         if self.opponent_HP < self.my_HP:
@@ -156,6 +165,7 @@ class StraPlayer(Player):
 
         if act == "attack":
             combined_list = self.oppo_poss_posi_s + self.oppo_poss_posi_w + self.oppo_poss_posi_c
+            print(self.oppo_poss_posi_s, self.oppo_poss_posi_w, self.oppo_poss_posi_c)
             if len(self.oppo_poss_posi_s) == 1: 
                 to = self.oppo_poss_posi_s[0]
                 if self.can_attack(to):
