@@ -188,7 +188,7 @@ class StraPlayer(Player):
                     print("combined list attempt")
                     if self.can_attack(to):
                         print("attck position found")
-                    return json.dumps(self.attack(to))
+                        return json.dumps(self.attack(to))
                     
                 # If no valid 'to' position found in 15 attempts, move on to the 'else:' branch
             else:
