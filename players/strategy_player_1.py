@@ -1,3 +1,6 @@
+
+
+
 import json
 import os
 import random
@@ -44,50 +47,42 @@ class StrategicPlayer(Player):
                 super().__init__(self.positions)
                 break
 
-        self.opponent_possible_positions = []
+        self.opponent_possible_positions =  []
         self.opponent_HP = 6
         self.player_HP = 6
-
-
-    def update_self_opponent_possible_positions(self, json_str):
-        json_data = json.loads(json_str)
-        if "result" in json_data:
-            result = json_data["result"]
-            if "attacked" in result:
-                attacked_pos = result["attacked"]["position"]
-                # Calculate the 9 cells around the attacked position
-                x, y = attacked_pos
-                around_attacked = [(x-1, y-1), (x-1, y), (x-1, y+1), (x, y-1), (x, y+1), (x+1, y-1), (x+1, y), (x+1, y+1)]                # Add the 9 cells around the attacked position to possible opponent position list 
-                for new_pos in around_attacked:
-                    self.opponent_possible_positions.append(new_pos)   
-                if "hit" in result["attacked"] and "near" not in result:
-                    self.player_HP -= 1
-            elif "moved" in result:
-                movement = result["moved"]["distance"]
-                # Update possible positions based on the direction and number of arrows
-                for pos in self.opponent_possible_positions.copy():  # Create a copy before iterating
-                    x, y = pos
-                    new_pos = (x + movement[0], y + movement[1])
-                    if new_pos in self.field and new_pos not in self.opponent_possible_positions:
-                        self.opponent_possible_positions.append(new_pos)
+        
     def update_after_action(self, json_str):
+        print("Received JSON Data in update_after_action:")
+        print(json_str)
         json_data = json.loads(json_str)
         if "result" in json_data:
             result = json_data["result"]
             if "attacked" in result:
                 attacked_pos = result["attacked"]["position"]
-                x, y = attacked_pos
+                x, y = attacked_pos 
                 if "hit" in result["attacked"]:
                     self.opponent_HP -= 1
                 elif "near" in result["attacked"]:
                     around_attacked = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
+                    print(around_attacked)
                     for new_pos in around_attacked:
-                        self.opponent_possible_positions.append(new_pos)
+                        if new_pos not in self.opponent_possible_positions:
+                            self.opponent_possible_positions.append(new_pos)
+            # Calculate total opponent's HP from their ship information
+            if "condition" in json_data and "enemy" in json_data["condition"]:
+                enemy_info = json_data["condition"]["enemy"]
+                self.opponent_HP = sum([ship_info["hp"] for ship_info in enemy_info.values()])
+
 
     def action(self):
-        if self.opponent_HP < self.player_HP:
+
+        total_player_HP = sum(ship.hp for ship in self.ships.values())
+        total_opponent_HP = self.opponent_HP
+
+
+        if total_opponent_HP< total_player_HP:
             act = random.choices(["move", "attack"], [2, 5], k=1)[0]
-        elif self.opponent_HP > self.player_HP:
+        elif total_opponent_HP > total_player_HP:
             act = random.choices(["move", "attack"], [5, 2], k=1)[0]
         else:
             act = random.choice(["move", "attack"])
@@ -97,17 +92,10 @@ class StrategicPlayer(Player):
 
         if act == "move":
             ship = random.choice(list(self.ships.values()))
-            while True:
+            to = random.choice(self.field)
+            while not ship.can_reach(to) or not self.overlap(to) is None:
                 to = random.choice(self.field)
-                # Check if the generated position is not adjacent to any other ship's position
-                adjacent_to_ship = any(ship.position[0] - 1 <= to[0] <= ship.position[0] + 1 and
-                                    ship.position[1] - 1 <= to[1] <= ship.position[1] + 1
-                                    for ship in self.ships.values())
-                if not ship.can_reach(to) or not self.overlap(to) is None or adjacent_to_ship:
-                    # If the position is invalid, generate a new one
-                    continue
-                else:
-                    return json.dumps(self.move(ship.type, to))
+            return json.dumps(self.move(ship.type, to)) 
         elif act == "attack":
             if self.opponent_possible_positions:
                 to = random.choice(self.opponent_possible_positions)
@@ -136,21 +124,17 @@ def main(host, port, seed=0):
             get_msg = sockfile.readline()
             logger.debug(get_msg)
             player = StrategicPlayer(seed=seed)
-            sockfile.write(player.initial_condition() + '\n')
-            sockfile.flush()
+            sockfile.write(player.initial_condition()+'\n')
 
             while True:
                 info = sockfile.readline().rstrip()
                 logger.debug(info)
                 if info == "your turn":
-                    sockfile.write(player.action() + '\n')
-                    sockfile.flush()
+                    sockfile.write(player.action()+'\n')
                     get_msg = sockfile.readline()
                     player.update_after_action(get_msg)
                 elif info == "waiting":
                     get_msg = sockfile.readline()
-                    if get_msg.strip():
-                        player.update_self_opponent_possible_positions(get_msg)
                 elif info == "you win":
                     logger.info("You win!")
                     break

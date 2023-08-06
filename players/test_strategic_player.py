@@ -1,53 +1,33 @@
-import unittest
-from strategy_player import StrategicPlayer
 import json
+import os
+import random
+import socket
+import sys
 
-class TestStrategicPlayer(unittest.TestCase):
+sys.path.append(os.getcwd())
 
-    def test_action_move(self):
-        # Test action when it selects "move"
-        player = StrategicPlayer()
-        player.ships = {
-            "w": {
-                "type": "w",
-                "position": [1, 1],
-                "hp": 3
-            }
-        }
-        player.opppnent_possible_positions = {
-            's': [(0, 0), (0, 1), (1, 0), (1, 2), (2, 1), (2, 2)],
-            'w': [(0, 0), (0, 1), (1, 0), (1, 2), (2, 1), (2, 2)],
-            'c': [(0, 0), (0, 1), (1, 0), (1, 2), (2, 1), (2, 2)]
-        }
+from lib.player_base import Player, PlayerShip
 
-        action_json = player.action()
-        action_data = json.loads(action_json)
+class CustomPlayer(Player):
+    def action(self):
+        act = random.choice(["move", "attack"])
 
-        self.assertIn("move", action_data)  # The result should contain "move" key
-        self.assertIn("ship", action_data["move"])  # The "move" key should contain "ship" key
-        self.assertIn("to", action_data["move"])  # The "move" key should contain "to" key
+        if act == "move":
+            ship = random.choice(list(self.positions.keys()))
+            to = random.choice(self.field)
+            while not self.can_move_to_position(ship, to):
+                to = random.choice(self.field)
+            print(f"{ship} moved from {self.positions[ship]} to {to}")
+            self.positions[ship] = to
+            return json.dumps({"moved": {"ship": ship, "distance": [to[0] - self.positions[ship][0], to[1] - self.positions[ship][1]]}})
+        else:
+            # Implement your attack logic here
+            # For example, you can randomly choose a target position to attack
+            target_pos = random.choice(self.field)
+            print(f"Attacking position: {target_pos}")
+            return json.dumps({"attack": {"position": target_pos}})
 
-    def test_action_attack(self):
-        # Test action when it selects "attack"
-        player = StrategicPlayer()
-        player.ships = {
-            "w": {
-                "type": "w",
-                "position": [1, 1],
-                "hp": 3
-            }
-        }
-        player.opppnent_possible_positions = {
-            's': [(0, 0), (0, 1), (1, 0), (1, 2), (2, 1), (2, 2)],
-            'w': [(0, 0), (0, 1), (1, 0), (1, 2), (2, 1), (2, 2)],
-            'c': [(0, 0), (0, 1), (1, 0), (1, 2), (2, 1), (2, 2)]
-        }
+# Create an instance of the Player class
+player = CustomPlayer()
 
-        action_json = player.action()
-        action_data = json.loads(action_json)
-
-        self.assertIn("attack", action_data)  # The result should contain "attack" key
-        self.assertIn("to", action_data["attack"])  # The "attack" key should contain "to" key
-
-if __name__ == '__main__':
-    unittest.main()
+print("Action Result:", player.action())

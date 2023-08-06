@@ -97,7 +97,7 @@ class StrategicPlayer(Player):
                 attacked_pos = result["attacked"]["position"]
                 x, y = attacked_pos 
                 if "hit" in result["attacked"]:
-                    self.opponent_certain_positions.append(attacked_pos)
+                    self.opponent_certain_positions.append((x,y))
                     self.opponent_HP -= 1
                 elif "near" in result["attacked"]:
                     around_attacked = [(x-1,y-1),(x-1,y),(x-1,y+1),(x,y-1),(x,y+1),(x+1,y-1),(x+1,y),(x+1,y+1)]
