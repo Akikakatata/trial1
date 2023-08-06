@@ -86,15 +86,36 @@ class StraPlayer(Player):
             condition_data = json_data["condition"]
             if "me" in condition_data:
                 me_data = condition_data["me"]
-                self.my_HP = (me_data["w"].get("hp", 0) +
-                            me_data["c"].get("hp", 0) +
-                            me_data.get("s", {}).get("hp", 0))
+                if "w" in me_data:
+                    w_hp = me_data.get("w", {}).get("hp", 0)
+                else:
+                    w_hp = 0
+                if "c" in me_data:
+                    c_hp = me_data.get("c", {}).get("hp", 0)
+                else:
+                    c_hp = 0
+                if "s" in me_data:
+                    s_hp = me_data.get("s", {}).get("hp", 0)
+                else:
+                    s_hp = 0
+                self.my_HP = w_hp + c_hp + s_hp
+
             if "enemy" in condition_data:
                 enemy_data = condition_data["enemy"]
-                # Use the get() method with a default value of 0 to handle missing keys
-                self.opponent_HP = (enemy_data.get("w", {}).get("hp", 0) +
-                                    enemy_data.get("c", {}).get("hp", 0) +
-                                    enemy_data.get("s", {}).get("hp", 0))    
+                if "w" in enemy_data:
+                    w_hp = enemy_data.get("w", {}).get("hp", 0)
+                else:
+                    w_hp = 0 
+                if "c" in enemy_data:
+                    c_hp = enemy_data.get("c", {}).get("hp", 0)
+                else:
+                    c_hp = 0 
+                if "s" in enemy_data:
+                    s_hp = enemy_data.get("s", {}).get("hp", 0)
+                else: 
+                    s_hp = 0
+                self.opponent_HP = w_hp + c_hp + s_hp
+                 
     def update_my_attack(self, json_str):
         print("Received JSON Data in update_my_attack:")
         print(json_str)
@@ -144,16 +165,35 @@ class StraPlayer(Player):
             condition_data = json_data["condition"]
             if "me" in condition_data:
                 me_data = condition_data["me"]
-                self.my_HP = (me_data["w"].get("hp", 0) +
-                            me_data["c"].get("hp", 0) +
-                            me_data.get("s", {}).get("hp", 0))
+                if "w" in me_data:
+                    w_hp = me_data.get("w", {}).get("hp", 0)
+                else:
+                    w_hp = 0
+                if "c" in me_data:
+                    c_hp = me_data.get("c", {}).get("hp", 0)
+                else:
+                    c_hp = 0
+                if "s" in me_data:
+                    s_hp = me_data.get("s", {}).get("hp", 0)
+                else:
+                    s_hp = 0
+                self.my_HP = w_hp + c_hp + s_hp
+
             if "enemy" in condition_data:
                 enemy_data = condition_data["enemy"]
-                # Use the get() method with a default value of 0 to handle missing keys
-                self.opponent_HP = (enemy_data.get("w", {}).get("hp", 0) +
-                                    enemy_data.get("c", {}).get("hp", 0) +
-                                    enemy_data.get("s", {}).get("hp", 0))
-    
+                if "w" in enemy_data:
+                    w_hp = enemy_data.get("w", {}).get("hp", 0)
+                else:
+                    w_hp = 0 
+                if "c" in enemy_data:
+                    c_hp = enemy_data.get("c", {}).get("hp", 0)
+                else:
+                    c_hp = 0 
+                if "s" in enemy_data:
+                    s_hp = enemy_data.get("s", {}).get("hp", 0)
+                else: 
+                    s_hp = 0
+                self.opponent_HP = w_hp + c_hp + s_hp
     def action(self):
         if self.opponent_HP < self.my_HP:
             act = random.choices(["move", "attack"], [2, 5], k=1)[0]
