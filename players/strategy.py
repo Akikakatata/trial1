@@ -91,10 +91,10 @@ class StraPlayer(Player):
                             me_data.get("s", {}).get("hp", 0))
             if "enemy" in condition_data:
                 enemy_data = condition_data["enemy"]
-                self.opponent_HP = (enemy_data["w"].get("hp", 0) +
-                                    enemy_data["c"].get("hp", 0) +
-                                    enemy_data.get("s", {}).get("hp", 0))
-    
+                # Use the get() method with a default value of 0 to handle missing keys
+                self.opponent_HP = (enemy_data.get("w", {}).get("hp", 0) +
+                                    enemy_data.get("c", {}).get("hp", 0) +
+                                    enemy_data.get("s", {}).get("hp", 0))    
     def update_my_attack(self, json_str):
         print("Received JSON Data in update_my_attack:")
         print(json_str)
@@ -149,10 +149,10 @@ class StraPlayer(Player):
                             me_data.get("s", {}).get("hp", 0))
             if "enemy" in condition_data:
                 enemy_data = condition_data["enemy"]
-                self.opponent_HP = (enemy_data["w"].get("hp", 0) +
-                                    enemy_data["c"].get("hp", 0) +
+                # Use the get() method with a default value of 0 to handle missing keys
+                self.opponent_HP = (enemy_data.get("w", {}).get("hp", 0) +
+                                    enemy_data.get("c", {}).get("hp", 0) +
                                     enemy_data.get("s", {}).get("hp", 0))
-    
     
     def action(self):
         if self.opponent_HP < self.my_HP:
