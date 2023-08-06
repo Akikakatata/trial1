@@ -49,6 +49,7 @@ class StraPlayer(Player):
         self.oppo_poss_posi_w = []
         self.my_HP = 6
         self.opponent_HP = 6
+        super().__init__(self.positions)
 
     def update_self_opponent_possible_positions(self, json_str):
         print("Received JSON Data in update_self_opponent_possible_positions:")
