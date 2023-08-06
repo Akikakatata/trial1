@@ -200,9 +200,8 @@ class StraPlayer(Player):
         for ship_position in self.positions.values():
             x, y = position
             x_ship, y_ship = ship_position
-            if ((x == x_ship) or (y == y_ship)) or (abs(x - x_ship) <= 1 and abs(y - y_ship) <= 1):
+            if ((x != x_ship) or (y != y_ship)) or (abs(x - x_ship) > 1 and abs(y - y_ship) > 1):
                 return True
-        return False
 
 
 def main(host, port, seed=0):
