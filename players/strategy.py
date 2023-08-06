@@ -154,6 +154,7 @@ class StraPlayer(Player):
             act = random.choice(["move", "attack"])
 
         if act == "attack":
+            combined_list = self.oppo_poss_posi_s + self.oppo_poss_posi_w + self.oppo_poss_posi_c
             if len(self.oppo_poss_posi_s) == 1: 
                 to = self.oppo_poss_posi_s[0]
                 if self.can_attack(to):
@@ -166,11 +167,15 @@ class StraPlayer(Player):
                 to = self.oppo_poss_posi_c[0]
                 if self.can_attack(to):
                     return json.dumps(self.attack(to))
-            else:
-                combined_list = self.oppo_poss_posi_s + self.oppo_poss_posi_w + self.oppo_poss_posi_c
+            elif combined_list:
                 to = random.choice(combined_list)
                 while not self.can_attack(to):
                     to = random.choice(combined_list)
+                return json.dumps(self.attack(to))
+            else:
+                to = random.choice(self.field)
+                while not self.can_attack(to):
+                    to = random.choice(self.field)
                 return json.dumps(self.attack(to))
 
         if act == "move":
