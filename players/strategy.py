@@ -146,37 +146,45 @@ class StraPlayer(Player):
                 self.opponent_HP = enemy_data["w"]["hp"] + enemy_data["c"]["hp"] + enemy_data["s"]["hp"]        
     
     def action(self):
-        if self.opponent_HP< self.my_HP:
+        if self.opponent_HP < self.my_HP:
             act = random.choices(["move", "attack"], [2, 5], k=1)[0]
         elif self.opponent_HP > self.my_HP:
             act = random.choices(["move", "attack"], [5, 2], k=1)[0]
         else:
             act = random.choice(["move", "attack"])
+        print(act)
 
         if act == "attack":
             combined_list = self.oppo_poss_posi_s + self.oppo_poss_posi_w + self.oppo_poss_posi_c
             if len(self.oppo_poss_posi_s) == 1: 
                 to = self.oppo_poss_posi_s[0]
                 if self.can_attack(to):
+                    print("attack s at" + to)
                     return json.dumps(self.attack(to))
             elif len(self.oppo_poss_posi_w) == 1: 
                 to = self.oppo_poss_posi_w[0]
                 if self.can_attack(to):
+                    print("attack w at" + to)
                     return json.dumps(self.attack(to))
             elif len(self.oppo_poss_posi_c) == 1:
                 to = self.oppo_poss_posi_c[0]
                 if self.can_attack(to):
+                    print("attack c at" + to)
                     return json.dumps(self.attack(to))
             elif combined_list:
                 # Try up to 15 times to find a valid 'to' position from 'combined_list'
                 for _ in range(15):
                     to = random.choice(combined_list)
+                    print("combined list attempt")
                     if self.can_attack(to):
-                        return json.dumps(self.attack(to))
+                        print("attck position found")
+                    return json.dumps(self.attack(to))
+                    
                 # If no valid 'to' position found in 15 attempts, move on to the 'else:' branch
             else:
                 # The 'else' branch remains the same
                 to = random.choice(self.field)
+                print("random attempt")
                 while not self.can_attack(to):
                     to = random.choice(self.field)
                 return json.dumps(self.attack(to))
