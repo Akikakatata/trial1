@@ -3,15 +3,15 @@ import os
 import random
 import socket
 import sys
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("StrategicPlayer")
 
 sys.path.append(os.getcwd())
 
 from lib.player_base import Player, PlayerShip
 
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("StrategicPlayer")
 
 class StraPlayer(Player):
     def __init__(self, seed=0):
