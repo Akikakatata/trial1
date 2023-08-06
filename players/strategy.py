@@ -168,11 +168,14 @@ class StraPlayer(Player):
                 if self.can_attack(to):
                     return json.dumps(self.attack(to))
             elif combined_list:
-                to = random.choice(combined_list)
-                while not self.can_attack(to):
+                # Try up to 15 times to find a valid 'to' position from 'combined_list'
+                for _ in range(15):
                     to = random.choice(combined_list)
-                return json.dumps(self.attack(to))
+                    if self.can_attack(to):
+                        return json.dumps(self.attack(to))
+                # If no valid 'to' position found in 15 attempts, move on to the 'else:' branch
             else:
+                # The 'else' branch remains the same
                 to = random.choice(self.field)
                 while not self.can_attack(to):
                     to = random.choice(self.field)
